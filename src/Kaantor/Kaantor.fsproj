@@ -1,0 +1,36 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net5.0</TargetFramework>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <ProductName>Simplee Pods</ProductName>
+    <Title>Simplee Kaantor</Title>
+    <PackageId>Simplee.Kaantor</PackageId>
+    <Authors>Vlad Eminovici and contributors</Authors>
+    <Owners>Vlad Eminovici</Owners>
+    <Copyright>Copyright 2020 Authors &amp; contributors</Copyright>
+    <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
+    <PackageProjectUrl>https://github.com/veminovici/kaantor</PackageProjectUrl>
+    <PackageTags>fsharp;distributed systems</PackageTags>
+    <PublishRepositoryUrl>true</PublishRepositoryUrl>
+    <Description>F# library for the distributed systems</Description>
+    <Version>0.0.1</Version>
+  </PropertyGroup>
+
+  <!-- Create a symbol package -->
+  <PropertyGroup>
+      <IncludeSymbols>true</IncludeSymbols>
+      <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.0.0" PrivateAssets="All"/>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Include="Library.fs" />
+  </ItemGroup>
+
+</Project>
