@@ -21,16 +21,18 @@ let toJson x =
 
 let parseJson<'a> json =
     use reader = new StringReader(json)
-    serializer.Deserialize<'a>(reader)
+    //serializer.Deserialize<'a>(reader)
+    serializer.Deserialize(reader)
 
-let fn x y = x + y + 1
+let fn x y = x + y
 
 let f = <@ fn 10 @>
 let serialized = toJson f
 
 printfn "Serialized:\n%s" serialized
 
-let deserialized = parseJson<Expr<int -> int>> serialized
+//let deserialized = parseJson<Expr<int -> int>> serialized
+let deserialized: Expr<int -> int> = parseJson serialized
 
 let increment = deserialized |> QuotationEvaluator.Evaluate
 

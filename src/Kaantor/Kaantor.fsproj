@@ -32,7 +32,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Compile Include="Library.fs" />
+    <Compile Include="Kernel.fs" />
   </ItemGroup>
 
 </Project>

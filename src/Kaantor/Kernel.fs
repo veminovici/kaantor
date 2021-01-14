@@ -1,5 +1,5 @@
-﻿namespace Kaantor
+﻿namespace Simplee.Distributed
 
-module Say =
+module Kernel = 
     let hello name =
         printfn "Hello %s" name
