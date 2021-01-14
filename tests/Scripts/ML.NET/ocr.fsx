@@ -27,6 +27,9 @@ type DigitPrediction =  {
     Score: float32 []
 }
 
+// You can download the mnist files from
+// https://www.kaggle.com/oddrationale/mnist-in-csv/
+
 let trainDataPath = "./mnist_train.csv"
 let testDataPath  = "./mnist_test.csv"
 
