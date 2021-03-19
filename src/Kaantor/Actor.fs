@@ -6,21 +6,21 @@ module Actor =
         | AReceived  of RequestIn
         | APublicAPI of Payload
 
-    let spawn (krnl: IKernel) (aid: ActorId) =
+    let spawn (krnl: IKernel) hApi zro (aid: ActorId) =
     
         let mbox = MailboxProcessor.Start(fun inbox ->
 
-            let rec loop () = async {
+            let rec loop stt = async {
                 match! inbox.Receive() with
                 | AReceived req -> 
                     printfn "We received a request: %O" req
-                    return! loop ()
+                    return! loop stt
                 | APublicAPI pld ->
-                    printfn "We received a public API %O" pld
-                    return! loop ()
+                    let stt' = hApi stt pld
+                    return! loop stt'
             }
             
-            loop ())
+            loop zro)
 
         let postReceived req = async{ mbox.Post (AReceived req) }
 
@@ -38,7 +38,8 @@ module Actor =
 
         let iActorInt = { new IActorInt with
             member _.SendRequests rs = ksend rs 
-            member _.CallPublicApi pld = mbox.Post (APublicAPI pld)
+            member _.CallPublicApi pld = 
+                mbox.Post (APublicAPI pld)
         }
 
         iActor, iActorInt

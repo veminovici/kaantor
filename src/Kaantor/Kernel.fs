@@ -35,7 +35,7 @@ module Kernel =
         // receives the requests sent by a client
         // converts the requests to the internal representation, packets,
         // and puts these packets in the internal queue to be processed.
-        let ksend aid (rs: RequestOut list) =            
+        let ksend aid (rs: RequestOut list) =
             rs
             |> List.map (ofRequestOut aid)
             |> KSend
@@ -56,13 +56,15 @@ module Kernel =
                 match! inbox.Receive () with
 
                 // Message where we need to register a give actor.
-                | KRegister (asink, rchnl) -> 
+                | KRegister (asink, rchnl) ->
                     rchnl.Reply (ksend asink.Aid)
                     return! loop (asink::actors)
 
                 // Message where the need to dispatch
                 // a list of packets.
                 | KSend pkts ->
+                    lgr.Info "Dispatching some packets ..."
+
                     pkts
                     |> List.map (toRequestIn >> fwd actors)
                     |> Async.ureduce
@@ -84,5 +86,5 @@ module Kernel =
 
         krnl
 
-    let spawn aid kernel = 
-        Actor.spawn kernel aid
+    let spawn aid hApi zro kernel = 
+        Actor.spawn kernel hApi zro aid
