@@ -17,8 +17,8 @@ module Kernel =
 
     /// The messages handled by the kernel mailbox.
     type private KMessage =
-        | KRegister of IActorSink * AsyncReplyChannel<KSend>
-        | KSend     of Packet list
+        | KMsgRegister of IActorSink * AsyncReplyChannel<KernelSendFn>
+        | KMsgSend     of Packet list
 
     let make () =
 
@@ -33,7 +33,7 @@ module Kernel =
         let ksend aid (rs: RequestOut list) =
             rs
             |> List.map (ofRequestOut aid)
-            |> KSend
+            |> KMsgSend
             |> mbox.Post
             |> ignore
             |> async.Return
@@ -51,15 +51,13 @@ module Kernel =
                 match! inbox.Receive () with
 
                 // Message where we need to register a give actor.
-                | KRegister (asink, rchnl) ->
+                | KMsgRegister (asink, rchnl) ->
                     rchnl.Reply (ksend asink.Aid)
                     return! loop (asink::actors)
 
                 // Message where the need to dispatch
                 // a list of packets.
-                | KSend pkts ->
-                    lgr.Err "Dispatching some packets ..."
-
+                | KMsgSend pkts ->
                     pkts
                     |> List.map (toRequestIn >> fwd actors)
                     |> Async.ureduce
@@ -72,12 +70,12 @@ module Kernel =
 
         let krnl = 
             { new IKernel with
-                member _.Register asink = mbox.PostAndAsyncReply (fun rchnl -> KRegister (asink, rchnl))
+                member _.Register asink = mbox.PostAndAsyncReply (fun rchnl -> KMsgRegister (asink, rchnl))
                 member _.Logger = lgr }
 
         lgr <- Logger.spawn krnl
 
         { new IKernel with
-            member _.Register asink = mbox.PostAndAsyncReply (fun rchnl -> KRegister (asink, rchnl))
+            member _.Register asink = mbox.PostAndAsyncReply (fun rchnl -> KMsgRegister (asink, rchnl))
             member _.Logger = lgr }
 

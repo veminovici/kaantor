@@ -12,5 +12,4 @@ module Async =
 
     let map f a = async {
         let! r = a
-        return f r
-    }
+        return f r }

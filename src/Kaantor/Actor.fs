@@ -1,8 +1,5 @@
 namespace Simplee.Distributed
 
-type HApi<'a> = obj -> 'a -> obj * 'a
-type HMsg<'a> = RequestIn -> 'a -> RequestOut list * 'a
-
 [<RequireQualifiedAccessAttribute>]
 module Actor =
 
@@ -10,7 +7,7 @@ module Actor =
         | AMsgReceived of RequestIn
         | AMsgApi of obj * AsyncReplyChannel<obj>
 
-    let spawn (krnl: IKernel) (hapi: HApi<'a>) (hmsg: HMsg<'a>) zro aid =
+    let spawn (krnl: IKernel) (hapi: ActorApiHndl<'a>) (hmsg: ActorMsgHndl<'a>) zro aid =
 
         let mbox = MailboxProcessor.Start(fun inbox ->
             
