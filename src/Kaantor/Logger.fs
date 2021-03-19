@@ -1,13 +1,5 @@
 namespace Simplee.Distributed
 
-type LEntry =
-    | LErr of string
-
-type ILogger =
-    inherit IActor
-    abstract member Err: string -> unit
-    abstract member Logs: Async<LEntry list>
-
 [<RequireQualifiedAccessAttribute>]
 module Logger = 
 
@@ -37,6 +29,13 @@ module Logger =
             |> iActorInt.Api 
             |> Async.RunSynchronously
 
+        let apiInfo msg =
+            msg
+            |> LInfo
+            |> LApiAddEntry
+            |> iActorInt.Api
+            |> Async.RunSynchronously
+
         let apiLogs () = 
             LApiGetLogs 
             |> iActorInt.Api 
@@ -44,5 +43,10 @@ module Logger =
 
         { new ILogger with 
             member _.Aid      = iActor.Aid 
-            member _.Err msg  = msg |> apiErr |> ignore 
+            member _.Info msg = msg |> apiInfo |> ignore
+            member _.Err msg  = msg |> apiErr  |> ignore 
             member _.Logs     = apiLogs () }
+
+    let err  (l: ILogger) msg = l.Err  msg
+    let info (l: ILogger) msg = l.Info msg
+    let logs (l: ILogger)     = l.Logs

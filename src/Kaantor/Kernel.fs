@@ -72,11 +72,12 @@ module Kernel =
 
         let krnl = 
             { new IKernel with
-                member _.Register asink = 
-                    mbox.PostAndAsyncReply (fun rchnl -> KRegister (asink, rchnl))
-            }
+                member _.Register asink = mbox.PostAndAsyncReply (fun rchnl -> KRegister (asink, rchnl))
+                member _.Logger = lgr }
 
         lgr <- Logger.spawn krnl
 
-        krnl
+        { new IKernel with
+            member _.Register asink = mbox.PostAndAsyncReply (fun rchnl -> KRegister (asink, rchnl))
+            member _.Logger = lgr }
 

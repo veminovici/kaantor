@@ -35,8 +35,19 @@ type IActorSink =
     abstract member Aid: ActorId
     abstract member Received: RequestIn -> Async<unit>
 
+type LEntry =
+    | LErr  of string
+    | LInfo of string
+
+type ILogger =
+    inherit IActor
+    abstract member Info: string -> unit
+    abstract member Err:  string -> unit
+    abstract member Logs: Async<LEntry list>
+
 type KSend = RequestOut list -> Async<unit>
 
 type IKernel =
     abstract member Register: IActorSink -> Async<KSend>
+    abstract member Logger: ILogger
 
