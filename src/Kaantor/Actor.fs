@@ -3,15 +3,20 @@ namespace Simplee.Distributed
 [<RequireQualifiedAccessAttribute>]
 module Actor = 
     type private AMessage =
-        | AReceived of RequestIn
+        | AReceived  of RequestIn
+        | APublicAPI of Payload
 
     let spawn (krnl: IKernel) (aid: ActorId) =
+    
         let mbox = MailboxProcessor.Start(fun inbox ->
 
             let rec loop () = async {
                 match! inbox.Receive() with
                 | AReceived req -> 
-                    printfn "We received a request"
+                    printfn "We received a request: %O" req
+                    return! loop ()
+                | APublicAPI pld ->
+                    printfn "We received a public API %O" pld
                     return! loop ()
             }
             
@@ -27,7 +32,13 @@ module Actor =
             |> krnl.Register
             |> Async.RunSynchronously
 
-        { new IActor with
+        let iActor = { new IActor with
             member _.Aid = async {return aid}
-            member _.Post rs = ksend rs 
         }
+
+        let iActorInt = { new IActorInt with
+            member _.SendRequests rs = ksend rs 
+            member _.CallPublicApi pld = mbox.Post (APublicAPI pld)
+        }
+
+        iActor, iActorInt

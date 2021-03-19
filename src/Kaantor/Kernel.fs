@@ -20,13 +20,21 @@ module Kernel =
         Tid = p.Tid
         Pld = p.Pld }
 
+    /// The messages handled by the kernel mailbox.
     type private KMessage =
         | KRegister of IActorSink * AsyncReplyChannel<KSend>
         | KSend     of Packet list
 
     let make () =
-        let mutable mbox : MailboxProcessor<KMessage> = Unchecked.defaultof<MailboxProcessor<KMessage>>
 
+        // The mailbox used by the kernel system. Use have this in order to refer the mailbox
+        // in our functions before it is really created.
+        let mutable mbox : MailboxProcessor<KMessage> = Unchecked.defaultof<MailboxProcessor<KMessage>>
+        let mutable lgr : ILoggerActor = Unchecked.defaultof<ILoggerActor>
+
+        // receives the requests sent by a client
+        // converts the requests to the internal representation, packets,
+        // and puts these packets in the internal queue to be processed.
         let ksend aid (rs: RequestOut list) =            
             rs
             |> List.map (ofRequestOut aid)
@@ -35,18 +43,25 @@ module Kernel =
             |> ignore
             |> async.Return
 
+        // forwards a request to a given actor.
         let fwd (actors: IActorSink list) (r: RequestIn) = 
             actors
             |> List.find (fun asink -> asink.Aid |> TID |> (=) r.Tid)
             |> fun asink -> asink.Received r
 
-        let m = MailboxProcessor.Start(fun inbox ->
+        // create the mailbox.
+        mbox <- MailboxProcessor.Start(fun inbox ->
 
             let rec loop actors = async {
                 match! inbox.Receive () with
+
+                // Message where we need to register a give actor.
                 | KRegister (asink, rchnl) -> 
                     rchnl.Reply (ksend asink.Aid)
                     return! loop (asink::actors)
+
+                // Message where the need to dispatch
+                // a list of packets.
                 | KSend pkts ->
                     pkts
                     |> List.map (toRequestIn >> fwd actors)
@@ -58,9 +73,16 @@ module Kernel =
             
             loop [])
 
-        mbox <- m
+        let krnl = 
+            { new IKernel with
+                member _.Register asink = 
+                    mbox.PostAndAsyncReply (fun rchnl -> KRegister (asink, rchnl))
+            }
 
-        { new IKernel with
-            member _.Register asink = 
-                mbox.PostAndAsyncReply (fun rchnl -> KRegister (asink, rchnl))
-        }
+        let lgrAPI, lgrInt = Logger.spawn krnl
+        lgr <- lgrAPI
+
+        krnl
+
+    let spawn aid kernel = 
+        Actor.spawn kernel aid

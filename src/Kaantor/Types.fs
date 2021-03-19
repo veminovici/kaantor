@@ -23,7 +23,10 @@ type RequestIn = {
 
 type IActor =
     abstract member Aid:  Async<ActorId>
-    abstract member Post: RequestOut list -> Async<unit>
+
+type IActorInt =
+    abstract member SendRequests: RequestOut list -> Async<unit>
+    abstract member CallPublicApi: Payload -> unit
 
 type IActorSink =
     abstract member Aid: ActorId

@@ -35,6 +35,7 @@
     <Compile Include="Async.fs"  />
     <Compile Include="Types.fs"  />
     <Compile Include="Actor.fs"  />
+    <Compile Include="Logger.fs" />
     <Compile Include="Kernel.fs" />
   </ItemGroup>
 
