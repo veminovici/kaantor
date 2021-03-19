@@ -1,5 +1,8 @@
 namespace Simplee.Distributed
 
+type HApi<'a> = obj -> 'a -> obj * 'a
+type HMsg<'a> = RequestIn -> 'a -> RequestOut list * 'a
+
 [<RequireQualifiedAccessAttribute>]
 module Actor =
 
@@ -7,7 +10,7 @@ module Actor =
         | AMsgReceived of RequestIn
         | AMsgApi of obj * AsyncReplyChannel<obj>
 
-    let spawn (krnl: IKernel) (hapi: obj -> 'a -> obj * 'a) zro aid =
+    let spawn (krnl: IKernel) (hapi: HApi<'a>) (hmsg: HMsg<'a>) zro aid =
 
         let mbox = MailboxProcessor.Start(fun inbox ->
             
@@ -18,8 +21,8 @@ module Actor =
 
                 /// Another actor sent us a request
                 | AMsgReceived req -> 
-                    printfn "We received a request: %O" req
-                    return! loop stt
+                    let reqs, stt' = hmsg req stt
+                    return! loop stt'
 
                 /// A caller invoked a public api.
                 | AMsgApi (args, rchnl) ->

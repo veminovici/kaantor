@@ -9,6 +9,10 @@ type FromId  = FID of ActorId with
 type ToId    = TID of ActorId with
     override this.ToString() = let (TID (AID i)) = this in i
 
+type Header = {
+    Fid: FromId
+    Tid: ToId }
+
 type Payload = PLD of byte[] with
     override this.ToString() = let (PLD xs) = this in sprintf "%A" xs
 
@@ -17,8 +21,7 @@ type RequestOut = {
     Pld: Payload }
 
 type RequestIn = {
-    Fid: FromId
-    Tid: ToId
+    Hdr: Header
     Pld: Payload }
 
 type IActor =

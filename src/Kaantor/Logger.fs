@@ -25,7 +25,10 @@ module Logger =
             | LApiAddEntry l -> () :> obj, l :: logs
             | LApiGetLogs -> logs :> obj, logs
 
-        let iActor, iActorInt = Actor.spawn krnl hapi [] (AID "sys:logger")
+        let hmsg (r: RequestIn) (logs: LEntry list) =
+            [], logs
+
+        let iActor, iActorInt = Actor.spawn krnl hapi hmsg [] (AID "sys:logger")
 
         let apiErr msg = 
             msg 

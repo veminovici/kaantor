@@ -6,19 +6,14 @@ open Simplee
 module Kernel = 
 
     type private Packet = {
-        Fid: FromId
-        Tid: ToId
+        Hdr: Header
         Pld: Payload }
 
-    let private ofRequestOut aid (r: RequestOut) = { 
-        Fid = FID aid
-        Tid = TID r.Tid
-        Pld = r.Pld }
+    let private ofRequestOut aid (r: RequestOut) = 
+        let hdr = {Fid = FID aid; Tid = TID r.Tid} in { Hdr = hdr; Pld = r.Pld }
 
-    let private toRequestIn (p: Packet) : RequestIn = {
-        Fid = p.Fid
-        Tid = p.Tid
-        Pld = p.Pld }
+    let private toRequestIn (p: Packet) : RequestIn = 
+        { Hdr = p.Hdr; Pld = p.Pld }
 
     /// The messages handled by the kernel mailbox.
     type private KMessage =
@@ -46,7 +41,7 @@ module Kernel =
         // forwards a request to a given actor.
         let fwd (actors: IActorSink list) (r: RequestIn) = 
             actors
-            |> List.find (fun asink -> asink.Aid |> TID |> (=) r.Tid)
+            |> List.find (fun asink -> asink.Aid |> TID |> (=) r.Hdr.Tid)
             |> fun asink -> asink.Received r
 
         // create the mailbox.
