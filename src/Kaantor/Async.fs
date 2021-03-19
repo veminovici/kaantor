@@ -9,3 +9,8 @@ module Async =
     let ureduce (xs: Async<unit> list) =
         xs
         |> List.reduce chain
+
+    let map f a = async {
+        let! r = a
+        return f r
+    }

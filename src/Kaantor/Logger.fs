@@ -1,38 +1,45 @@
 namespace Simplee.Distributed
 
-type private LEntry =
-    | LErr  of string
-    | LInfo of string
-    | LReq  of string
+type LEntry =
+    | LErr of string
 
-type ILoggerActor =
+type ILogger =
     inherit IActor
-
-    abstract member Err:  string -> unit
-    abstract member Info: string -> unit
-    abstract member Req:  string -> unit
+    abstract member Err: string -> unit
+    abstract member Logs: Async<LEntry list>
 
 [<RequireQualifiedAccessAttribute>]
-module Logger =
+module Logger = 
 
-    open MBrace.FsPickler
+    open Simplee
 
-    let spawn (kernel: IKernel) =
-        let bser = FsPickler.CreateBinarySerializer()
-        let zro = []
+    /// The public apis
+    type private LApi =
+        | LApiAddEntry of LEntry
+        | LApiGetLogs
 
-        let hApi stt (PLD pld) = 
-            let lentry = bser.UnPickle<LEntry> pld
-            printfn "Logger entry: %O" lentry
-            lentry :: stt
+    let spawn (krnl: IKernel) =
 
-        let iActor, iActorInt = Actor.spawn kernel hApi zro (AID "sys:logger")
+        let hapi (args: obj) (logs: LEntry list) =
+            match (args :?> LApi) with
+            | LApiAddEntry l -> () :> obj, l :: logs
+            | LApiGetLogs -> logs :> obj, logs
 
-        let iLogger = { new ILoggerActor with
-            member _.Aid = iActor.Aid 
-            member _.Err  msg = msg |> LErr  |> bser.Pickle |> PLD |> iActorInt.CallPublicApi
-            member _.Info msg = msg |> LInfo |> bser.Pickle |> PLD |> iActorInt.CallPublicApi
-            member _.Req  msg = msg |> LReq  |> bser.Pickle |> PLD |> iActorInt.CallPublicApi
-        }
+        let iActor, iActorInt = Actor.spawn krnl hapi [] (AID "sys:logger")
 
-        iLogger, iActorInt
+        let apiErr msg = 
+            msg 
+            |> LErr 
+            |> LApiAddEntry 
+            |> iActorInt.Api 
+            |> Async.RunSynchronously
+
+        let apiLogs () = 
+            LApiGetLogs 
+            |> iActorInt.Api 
+            |> Async.map (fun o -> o :?> (LEntry list))
+
+        { new ILogger with 
+            member _.Aid      = iActor.Aid 
+            member _.Err msg  = msg |> apiErr |> ignore 
+            member _.Logs     = apiLogs () }

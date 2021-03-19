@@ -30,7 +30,7 @@ module Kernel =
         // The mailbox used by the kernel system. Use have this in order to refer the mailbox
         // in our functions before it is really created.
         let mutable mbox : MailboxProcessor<KMessage> = Unchecked.defaultof<MailboxProcessor<KMessage>>
-        let mutable lgr : ILoggerActor = Unchecked.defaultof<ILoggerActor>
+        let mutable lgr : ILogger = Unchecked.defaultof<ILogger>
 
         // receives the requests sent by a client
         // converts the requests to the internal representation, packets,
@@ -63,7 +63,7 @@ module Kernel =
                 // Message where the need to dispatch
                 // a list of packets.
                 | KSend pkts ->
-                    lgr.Info "Dispatching some packets ..."
+                    lgr.Err "Dispatching some packets ..."
 
                     pkts
                     |> List.map (toRequestIn >> fwd actors)
@@ -81,10 +81,7 @@ module Kernel =
                     mbox.PostAndAsyncReply (fun rchnl -> KRegister (asink, rchnl))
             }
 
-        let lgrAPI, lgrInt = Logger.spawn krnl
-        lgr <- lgrAPI
+        lgr <- Logger.spawn krnl
 
         krnl
 
-    let spawn aid hApi zro kernel = 
-        Actor.spawn kernel hApi zro aid
