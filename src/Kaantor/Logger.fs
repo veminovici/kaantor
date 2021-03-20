@@ -22,10 +22,10 @@ module Logger =
             match (args :?> LApi) with
 
             // Add a new log entry to the internal list of entries
-            | LApiAddEntry l -> () :> obj, l :: logs
+            | LApiAddEntry l -> () :> obj, [], l :: logs
 
             // Returns the internal list of entries.
-            | LApiGetLogs -> logs :> obj, logs
+            | LApiGetLogs -> logs :> obj, [], logs
 
         /// Called when the logger receive a request.
         let hmsg (r: RequestIn) (logs: LEntry list) =

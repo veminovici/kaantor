@@ -25,8 +25,8 @@ module NodeR =
 
         let hapi (args: obj) (ns: NeighborLR list) =
             match (args :?> NApi) with
-            | NApiAddNeighbor n -> () :> obj, n :: ns
-            | NApiGetNeighbors -> ns :> obj, ns
+            | NApiAddNeighbor n -> () :> obj, [], n :: ns
+            | NApiGetNeighbors  -> ns :> obj, [], ns
 
         let hmsg (r: RequestIn) (ns: NeighborLR list) =
             [], ns

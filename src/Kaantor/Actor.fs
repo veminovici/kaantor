@@ -17,8 +17,10 @@ module Actor =
     /// The actor uses the given handlers to process the incoming requests and the api calls.
     let spawn (krnl: IKernel) (hapi: ActorApiHndl<'a>) (hmsg: ActorMsgHndl<'a>) zro aid =
 
+        let mutable ksend = Unchecked.defaultof<KernelSendFn>
+
         let mbox = MailboxProcessor.Start(fun inbox ->
-            
+
             let rec loop stt = async {
 
                 try
@@ -31,8 +33,13 @@ module Actor =
 
                 /// A caller invoked a public api.
                 | AMsgApi (args, rchnl) ->
-                    let res, stt' = hapi args stt
-                    rchnl.Reply res// VLD - here we need to put the returns value.
+                    let res, rs, stt' = hapi args stt
+
+                    rchnl.Reply res
+
+                    // send the requests out.
+                    do! ksend rs
+
                     return! loop stt'
                 with
                 | e -> printfn "Error: %O" e
@@ -46,7 +53,7 @@ module Actor =
         /// Registers the actor's sink with the kernel
         /// we get back a function which the actor will
         /// call whenever wants to send out requests.
-        let ksend = 
+        ksend <- 
             { new IActorSink with
                 member _.Aid = aid
                 member _.Received req = postReceived req 
@@ -56,14 +63,14 @@ module Actor =
 
         /// The public actor's interface.
         let iActor = { new IActor with
-            member _.Aid      = aid }
+            member _.Aid = aid }
 
         /// The internal actor's interfaces.
         /// This interface will be used to the more specific
         /// actors to send requests to other actors.
         let iActorInt = { new IActorInt with
-            member _.SendRequests rs   = ksend rs 
-            member _.Api args = mbox.PostAndAsyncReply (fun r -> AMsgApi (args, r)) }
+            member _.SendRequests rs = ksend rs 
+            member _.Api        args = mbox.PostAndAsyncReply (fun r -> AMsgApi (args, r)) }
 
         /// Return the public and internal 
         /// actor's interfaces

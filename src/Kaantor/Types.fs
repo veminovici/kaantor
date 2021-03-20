@@ -54,7 +54,7 @@ type IActorSink =
 /// when a public api call is placed. The handler receives
 /// the the arguments and the actor's internal state and returns
 /// the optional result and the new state.
-type ActorApiHndl<'TState> = obj -> 'TState -> obj * 'TState
+type ActorApiHndl<'TState> = obj -> 'TState -> obj * (RequestOut list) * 'TState
 
 /// A handle function that defines the actor behavior
 /// when a message is received. The handler receives
