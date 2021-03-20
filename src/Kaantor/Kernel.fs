@@ -2,24 +2,34 @@ namespace Simplee.Distributed
 
 open Simplee
 
+/// Implementation of the kernel
+
 [<RequireQualifiedAccessAttribute>]
 module Kernel = 
 
+    /// The internal packet sent over inside the kernel infrastructure
     type private Packet = {
         Hdr: Header
         Pld: Payload }
 
+    /// Converts outgoing requests to an internal packet.
     let private ofRequestOut aid (r: RequestOut) = 
         let hdr = {Fid = FID aid; Tid = TID r.Tid} in { Hdr = hdr; Pld = r.Pld }
 
+    /// Converts an internal packet to an incoming request.
     let private toRequestIn (p: Packet) : RequestIn = 
         { Hdr = p.Hdr; Pld = p.Pld }
 
     /// The messages handled by the kernel mailbox.
     type private KMessage =
+
+        /// Register a new actor.
         | KMsgRegister of IActorSink * AsyncReplyChannel<KernelSendFn>
+
+        /// Send a list of packets.
         | KMsgSend     of Packet list
 
+    /// Create a new kernel.
     let make () =
 
         // The mailbox used by the kernel system. Use have this in order to refer the mailbox
@@ -68,14 +78,16 @@ module Kernel =
             
             loop [])
 
+        /// Create a kernel implementation, without a logger.
         let krnl = 
             { new IKernel with
                 member _.Register asink = mbox.PostAndAsyncReply (fun rchnl -> KMsgRegister (asink, rchnl))
                 member _.Logger = lgr }
 
+        /// Create the logger, using the newly created kernel
         lgr <- Logger.spawn krnl
 
+        /// Recreate the kernel implementation, this time using the logger.
         { new IKernel with
             member _.Register asink = mbox.PostAndAsyncReply (fun rchnl -> KMsgRegister (asink, rchnl))
             member _.Logger = lgr }
-

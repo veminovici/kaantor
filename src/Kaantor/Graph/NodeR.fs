@@ -2,33 +2,33 @@ namespace Simplee.Distributed.Graph
 
 open Simplee.Distributed
 
-type Neighbor = {
-    Nid: ActorId
-    W: float }
+type NeighborLR = 
+    | NeighborR of Neighbor
+    | NeighborL of Neighbor
 
-type INode =
+type INodeLR =
     inherit IActor
-    abstract member AddNeighbor: Neighbor -> unit
-    abstract member Neighbors: Async<Neighbor list>
+    abstract member AddNeighbor: NeighborLR -> unit
+    abstract member Neighbors: Async<NeighborLR list>
 
 [<RequireQualifiedAccess>]
-module Node =
+module NodeR =
 
     open Simplee
 
     /// The public apis
     type private NApi =
-        | NApiAddNeighbor of Neighbor
+        | NApiAddNeighbor of NeighborLR
         | NApiGetNeighbors
 
     let spawn (krnl: IKernel) aid =
 
-        let hapi (args: obj) (ns: Neighbor list) =
+        let hapi (args: obj) (ns: NeighborLR list) =
             match (args :?> NApi) with
             | NApiAddNeighbor n -> () :> obj, n :: ns
             | NApiGetNeighbors -> ns :> obj, ns
 
-        let hmsg (r: RequestIn) (ns: Neighbor list) =
+        let hmsg (r: RequestIn) (ns: NeighborLR list) =
             [], ns
 
         let iActor, iActorInt = Actor.spawn krnl hapi hmsg [] aid
@@ -42,14 +42,17 @@ module Node =
         let apiNeighbors () = 
             NApiGetNeighbors
             |> iActorInt.Api 
-            |> Async.map (fun o -> o :?> (Neighbor list))
+            |> Async.map (fun o -> o :?> (NeighborLR list))
 
-        { new INode with 
+        { new INodeLR with 
             member _.Aid = iActor.Aid 
             member _.AddNeighbor n = n |> apiAddNeighbor |> ignore
             member _.Neighbors = apiNeighbors () }
 
-    let apiAddNeighbor n (node: INode) = node.AddNeighbor n
-    let neighbors (node: INode) = node.Neighbors
-    let aid (node: INode) = node.Aid 
+    let apiAddNeighbor      n (node: INodeLR) = node.AddNeighbor n
+    let apiAddLeftNeighbor  n (node: INodeLR) = apiAddNeighbor (NeighborL n) node
+    let apiAddRightNeighbor n (node: INodeLR) = apiAddNeighbor (NeighborR n) node
+    
+    let neighbors (node: INodeLR) = node.Neighbors
+    let aid (node: INodeLR) = node.Aid 
 

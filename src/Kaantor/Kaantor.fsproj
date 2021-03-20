@@ -38,6 +38,7 @@
     <Compile Include="Logger.fs" />
     <Compile Include="Kernel.fs" />
     <Compile Include="Graph/Node.fs" />
+    <Compile Include="Graph/NodeR.fs" />
   </ItemGroup>
 
 </Project>
