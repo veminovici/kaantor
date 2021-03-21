@@ -49,7 +49,7 @@ module Node =
             member _.AddNeighbor n = n |> apiAddNeighbor |> ignore
             member _.Neighbors = apiNeighbors () }
 
-    let apiAddNeighbor n (node: INode) = node.AddNeighbor n
+    let addNeighbor n (node: INode) = node.AddNeighbor n
     let neighbors (node: INode) = node.Neighbors
     let aid (node: INode) = node.Aid 
 

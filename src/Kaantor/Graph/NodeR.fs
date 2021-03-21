@@ -49,9 +49,9 @@ module NodeR =
             member _.AddNeighbor n = n |> apiAddNeighbor |> ignore
             member _.Neighbors = apiNeighbors () }
 
-    let apiAddNeighbor      n (node: INodeLR) = node.AddNeighbor n
-    let apiAddLeftNeighbor  n (node: INodeLR) = apiAddNeighbor (NeighborL n) node
-    let apiAddRightNeighbor n (node: INodeLR) = apiAddNeighbor (NeighborR n) node
+    let addNeighbor      n (node: INodeLR) = node.AddNeighbor n
+    let addLeftNeighbor  n (node: INodeLR) = addNeighbor (NeighborL n) node
+    let addRightNeighbor n (node: INodeLR) = addNeighbor (NeighborR n) node
     
     let neighbors (node: INodeLR) = node.Neighbors
     let aid (node: INodeLR) = node.Aid 
