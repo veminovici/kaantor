@@ -6,72 +6,89 @@ namespace Simplee.Distributed
 module Logger = 
 
     open Simplee
+    open System.Threading.Tasks
 
-    /// The public api exposed by the Logger actor
-    type private LApi =
-        /// Add a new log entry
-        | LApiAddEntry of LEntry
-        /// Returns the log entries
-        | LApiGetLogs
+    type private Stt = Stt of LEntry list
+        with
+        static member Empty = Stt []
+
+    type private Msg =
+        | MsgErr of string
+        | MsgInfo of string
+        | MsgLogs of TaskCompletionSource<LEntry list>
+
+    let private (|AddErr|_|) msg =
+        msg
+        |> DMessage.pld
+        |> function
+        | :? Msg as msg ->
+            match msg with
+            | MsgErr txt -> Some txt
+            | _ -> None
+        | _ -> None
+
+    let private (|AddInfo|_|) msg =
+        msg
+        |> DMessage.pld
+        |> function
+        | :? Msg as msg ->
+            match msg with
+            | MsgInfo txt -> Some txt
+            | _ -> None
+        | _ -> None
+
+    let private (|GetLogs|_|) msg =
+        msg
+        |> DMessage.pld
+        |> function
+        | :? Msg as msg ->
+            match msg with
+            | MsgLogs tcs -> Some tcs
+            | _ -> None
+        | _ -> None
 
     /// Create a new logger actors using a given kernel
-    let spawn (krnl: IKernel) =
+    let make (krnl: IKernel) =
 
-        /// Called when a new public api call is placed by an external caller
-        let hapi (args: obj) (logs: LEntry list) =
-            match (args :?> LApi) with
-
-            // Add a new log entry to the internal list of entries
-            | LApiAddEntry l -> () :> obj, [], l :: logs
-
-            // Returns the internal list of entries.
-            | LApiGetLogs -> logs :> obj, [], logs
+        let aid = AID "sys:logger"
 
         /// Called when the logger receive a request.
-        let hmsg (r: RequestIn) (logs: LEntry list) =
-            [], logs
+        let rcv (msg: DMessage) (Stt logs) =
+            let msgs, stt = 
+                match msg with
+                | AddInfo txt -> 
+                    [], LInfo txt :: logs |> Stt
+                | AddErr  txt -> 
+                    [], LErr  txt :: logs |> Stt
+                | GetLogs tcs -> 
+                    tcs.SetResult logs
+                    [], Stt logs
+                | _ -> 
+                    [], Stt logs
+
+            (msgs, stt) |> async.Return
 
         /// Create the actor, using the defined handlers, 
         /// and the initial empty list of log entries.
-        let iActor, iActorInt = Actor.spawn krnl hapi hmsg [] (AID "sys:logger")
+        let iActor, iActorSink, ksend = Actor.make krnl rcv Stt.Empty aid
 
-        /// Helper function to process the public api call
-        /// which adds a new error log entry.
-        let apiErr msg = 
-            msg 
-            |> LErr 
-            |> LApiAddEntry 
-            |> iActorInt.Api 
-            |> Async.RunSynchronously
+        let postMe pld = IActorSink.postMe aid pld iActorSink
 
-        /// Helper function to process the public api call
-        /// which adds a new info log entry.
-        let apiInfo msg =
-            msg
-            |> LInfo
-            |> LApiAddEntry
-            |> iActorInt.Api
-            |> Async.RunSynchronously
-
-        /// Helper function to process the public api call
-        /// which should return the current list of log entries.
-        let apiLogs () = 
-            LApiGetLogs 
-            |> iActorInt.Api 
-            |> Async.map (fun o -> o :?> (LEntry list))
+        let postInfo s = s |> MsgInfo |> postMe
+        let postErr  s = s |> MsgErr  |> postMe 
+        let postLogs   = let tcs = TaskCompletionSource<LEntry list>() in tcs |> MsgLogs |> postMe |> Async.bind (fun _ -> tcs.Task |> Async.AwaitTask)
 
         /// The ILogger implementation.
         { new ILogger with 
             member _.Aid      = iActor.Aid 
-            member _.Info msg = msg |> apiInfo |> ignore
-            member _.Err msg  = msg |> apiErr  |> ignore 
-            member _.Logs     = apiLogs () }
+            member _.Info msg = postInfo msg
+            member _.Err msg  = postErr msg
+            member _.Logs     = postLogs }
 
     /// Add new error log entry
-    let err  (l: ILogger) msg = l.Err  msg
+    let err msg (l: ILogger) = l.Err msg
 
     /// Add new info log entry
-    let info (l: ILogger) msg = l.Info msg
+    let info msg (l: ILogger) = l.Info msg
 
-    /// Return the lost of log entries.
-    let logs (l: ILogger)     = l.Logs
+    let logs (l: ILogger) = l.Logs

@@ -10,13 +10,10 @@ open Simplee.Distributed
 
 printfn "Starting testing"
 
+
 let krnl = Kernel.make ()
-let log = Logger.spawn krnl
 
-[1..5]
-|> List.map (sprintf "msg%d")
-|> List.iter log.Err
-
-log.Logs |> Async.RunSynchronously |> printfn "Logs: %O"
+krnl |> Kernel.logger |> Logger.err "testing" |> Async.RunSynchronously
+krnl |> Kernel.logger |> Logger.logs |> Async.RunSynchronously |> printfn "Logs: %O"
 
 printfn "Ended testing"

@@ -2,57 +2,75 @@ namespace Simplee.Distributed.Graph
 
 open Simplee.Distributed
 
-type NeighborLR = 
-    | NeighborR of Neighbor
-    | NeighborL of Neighbor
+type EdgeR = 
+    | EdgeRight of Edge
+    | EdgeLeft  of Edge
 
-type INodeLR =
+type INodeR =
     inherit IActor
-    abstract member AddNeighbor: NeighborLR -> unit
-    abstract member Neighbors: Async<NeighborLR list>
+    abstract member AddEdge: EdgeR -> Async<unit>
+    abstract member Edges: Async<EdgeR list>
+
+type NodeRState = NodeRState of EdgeR list
+    with
+    static member Empty = NodeRState []
 
 [<RequireQualifiedAccess>]
 module NodeR =
 
     open Simplee
+    open System.Threading.Tasks
 
-    /// The public apis
-    type private NApi =
-        | NApiAddNeighbor of NeighborLR
-        | NApiGetNeighbors
+    type private Msg =
+        | MsgAddEdge of EdgeR
+        | MsgEdges   of TaskCompletionSource<EdgeR list>
 
-    let spawn (krnl: IKernel) aid =
+    let private (|AddEdge|_|) msg =
+        msg
+        |> DMessage.pld
+        |> function
+        | :? Msg as msg ->
+            match msg with
+            | MsgAddEdge edge -> Some edge
+            | _ -> None
+        | _ -> None
 
-        let hapi (args: obj) (ns: NeighborLR list) =
-            match (args :?> NApi) with
-            | NApiAddNeighbor n -> () :> obj, [], n :: ns
-            | NApiGetNeighbors  -> ns :> obj, [], ns
+    let private (|Edges|_|) msg =
+        msg
+        |> DMessage.pld
+        |> function
+        | :? Msg as msg ->
+            match msg with
+            | MsgEdges tcs -> Some tcs
+            | _ -> None
+        | _ -> None
 
-        let hmsg (r: RequestIn) (ns: NeighborLR list) =
-            [], ns
+    let make (krnl: IKernel) hmsg aid =
 
-        let iActor, iActorInt = Actor.spawn krnl hapi hmsg [] aid
+        /// Called when the logger receive a request.
+        let rcv (msg: DMessage) (NodeRState edges) =
+            match msg with
+            | AddEdge edge -> 
+                let msg, stt = [], edge :: edges |> NodeRState
+                (msg, stt) |> async.Return
+            | Edges tcs -> 
+                tcs.SetResult edges
+                let msg, stt = [], (NodeRState edges)
+                (msg, stt) |> async.Return
+            | _ -> 
+                hmsg msg (NodeRState edges)
 
-        let apiAddNeighbor n =
-            n
-            |> NApiAddNeighbor
-            |> iActorInt.Api
-            |> Async.RunSynchronously
+        /// Create the actor, using the defined handlers, 
+        /// and the initial empty list of log entries.
+        let iActor, iActorSink, ksend = Actor.make krnl rcv NodeRState.Empty aid
 
-        let apiNeighbors () = 
-            NApiGetNeighbors
-            |> iActorInt.Api 
-            |> Async.map (fun o -> o :?> (NeighborLR list))
+        let postMe pld = IActorSink.postMe aid pld iActorSink
 
-        { new INodeLR with 
-            member _.Aid = iActor.Aid 
-            member _.AddNeighbor n = n |> apiAddNeighbor |> ignore
-            member _.Neighbors = apiNeighbors () }
+        let postAddEdge edge = edge |> MsgAddEdge |> postMe
+        let postEdges = let tcs = TaskCompletionSource<EdgeR list>() in tcs |> MsgEdges |> postMe |> Async.bind (fun _ -> tcs.Task |> Async.AwaitTask)
 
-    let addNeighbor      n (node: INodeLR) = node.AddNeighbor n
-    let addLeftNeighbor  n (node: INodeLR) = addNeighbor (NeighborL n) node
-    let addRightNeighbor n (node: INodeLR) = addNeighbor (NeighborR n) node
-    
-    let neighbors (node: INodeLR) = node.Neighbors
-    let aid (node: INodeLR) = node.Aid 
-
+        /// The ILogger implementation.
+        { new INodeR with 
+            member _.Aid          = iActor.Aid
+            member _.AddEdge edge = edge |> postAddEdge
+            member _.Edges        = postEdges }

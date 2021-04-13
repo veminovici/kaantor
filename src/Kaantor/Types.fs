@@ -2,65 +2,45 @@ namespace Simplee.Distributed
 
 /// The actor identifier.
 type ActorId = AID of string with
+    static member Empty = AID ""
     override this.ToString() = let (AID i) = this in i
 
 /// The identifier of the source of the message
 type FromId  = FID of ActorId with
+    static member Empty = FID ActorId.Empty
     override this.ToString() = let (FID (AID i)) = this in i
 
 /// The identifier of the destination of the message
 type ToId    = TID of ActorId with
+    static member Empty = TID ActorId.Empty
     override this.ToString() = let (TID (AID i)) = this in i
 
 /// The header of the message
 type Header = {
     Fid: FromId
-    Tid: ToId }
+    Tid: ToId } with
+    static member Empty = { Fid = FromId.Empty; Tid = ToId.Empty }
+    override this.ToString() = sprintf "%O->%O" this.Fid this.Tid
 
 /// The payload of the message. The payload is just an array of bytes.
-type Payload = PLD of byte[] with
-    override this.ToString() = let (PLD xs) = this in sprintf "%A" xs
+type Payload = PLD of obj with
+    static member Empty = PLD null
+    override this.ToString() = let (PLD o) = this in sprintf "%A" o
 
-/// A request containing a payload to be sent to a given actor.
-type RequestOut = { 
-    Tid: ActorId
-    Pld: Payload }
-
-/// A received request, with a given payload, from an actor.
-type RequestIn = {
+/// A received message, with a given payload, from an actor.
+type DMessage = {
     Hdr: Header
-    Pld: Payload }
+    Pld: Payload } with
+    static member Empty = { Hdr = Header.Empty; Pld = Payload.Empty }
 
 /// The behavior of an actor. It just needs to return its identity.
 type IActor =
     abstract member Aid:  ActorId
 
-/// The internal behavior of an actor. 
-/// An actor should be able to send requests.
-/// Also an actor should able to process public api calls, which could
-/// have arguments and optionally return a result.
-type IActorInt =
-    abstract member SendRequests: RequestOut list -> Async<unit>
-    abstract member Api: obj -> Async<obj>
-
-/// The actor sink behavior.
-/// The actor should be able to identify itself.
-/// The actor should be able to receive messages.
+/// The actor sink behavior: can return the actor identifier, or handle an incoming message.
 type IActorSink =
-    abstract member Aid: ActorId
-    abstract member Received: RequestIn -> Async<unit>
-
-/// A handle function that defines the actor behavior
-/// when a public api call is placed. The handler receives
-/// the the arguments and the actor's internal state and returns
-/// the optional result and the new state.
-type ActorApiHndl<'TState> = obj -> 'TState -> obj * (RequestOut list) * 'TState
-
-/// A handle function that defines the actor behavior
-/// when a message is received. The handler receives
-// the incoming requests and the actor's internal state and returns
-// the list of requests to be sent out and the new internal state.
-type ActorMsgHndl<'a> = RequestIn -> 'a -> RequestOut list * 'a
+    abstract member Aid:  ActorId
+    abstract member Post: DMessage -> Async<unit>
 
 /// The log entry.
 type LEntry =
@@ -72,13 +52,13 @@ type LEntry =
 /// it can return the recorded entries.
 type ILogger =
     inherit IActor
-    abstract member Info: string -> unit
-    abstract member Err:  string -> unit
+    abstract member Info: string -> Async<unit>
+    abstract member Err:  string -> Async<unit>
     abstract member Logs: Async<LEntry list>
 
 /// An alias for the functions that receive a list of outgoing
 /// requests and dispatches those requests.
-type KernelSendFn = RequestOut list -> Async<unit>
+type KernelSendFn = DMessage list -> Async<unit>
 
 /// The behavior of the kernel. It registers an actor sink and returns
 /// to the actor the function to be called to dispatch outgoing requests.
@@ -86,3 +66,31 @@ type KernelSendFn = RequestOut list -> Async<unit>
 type IKernel =
     abstract member Register: IActorSink -> Async<KernelSendFn>
     abstract member Logger: ILogger
+
+type DReceiveMessage<'TState> = DMessage -> 'TState -> Async<DMessage list * 'TState>
+
+[<RequireQualifiedAccess>]
+module Header =
+    let withFrom fid h = { h with Fid = fid }
+    let withTo   tid h = { h with Tid = tid }
+    let toMe     aid   = Header.Empty |> withFrom (FID aid) |> withTo (TID aid)
+
+[<RequireQualifiedAccess>]
+module DMessage =
+
+    let withHdr  h   m = { m with Hdr = h }
+    let withFrom fid m = { m with Hdr = Header.withFrom fid m.Hdr }
+    let withTo   tid m = { m with Hdr = Header.withTo tid m.Hdr }
+    let withMe   aid m = let hdr = aid |> Header.toMe in withHdr hdr m
+    let withPld  pld m = { m with Pld = PLD pld }
+
+    let pld m = let (PLD pld) = m.Pld in pld
+
+[<RequireQualifiedAccess>]
+module IActorSink = 
+
+    let postMe aid pld (sink: IActorSink) = 
+        DMessage.Empty 
+        |> DMessage.withMe aid 
+        |> DMessage.withPld pld 
+        |> sink.Post

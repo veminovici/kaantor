@@ -34,3 +34,5 @@ module Async =
 
     /// Zips the results of two async flows.
     let zip x y = map2 (fun x y -> x, y) x y
+
+    let bind f a = async.Bind (a, f)

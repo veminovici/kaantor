@@ -1,9 +1,7 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
-
+<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFramework>net5.0</TargetFramework>
   </PropertyGroup>
-
   <PropertyGroup>
     <ProductName>Simplee Pods</ProductName>
     <Title>Simplee Kaantor</Title>
@@ -18,27 +16,23 @@
     <Description>F# library for the distributed systems</Description>
     <Version>0.0.1</Version>
   </PropertyGroup>
-
-  <!-- Create a symbol package -->
   <PropertyGroup>
-      <IncludeSymbols>true</IncludeSymbols>
-      <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+    <IncludeSymbols>true</IncludeSymbols>
+    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
   </PropertyGroup>
-
   <ItemGroup>
     <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.0.0" PrivateAssets="All"/>
-    <PackageReference Include="FsPickler" Version="5.3.2" />
-    <PackageReference Include="FsPickler.Json" Version="5.3.2" />
+    <PackageReference Include="FsPickler" Version="5.3.2"/>
+    <PackageReference Include="FsPickler.Json" Version="5.3.2"/>
+    <PackageReference Include="FSharp.Control.AsyncSeq" Version="3.0.3"/>
   </ItemGroup>
-
   <ItemGroup>
-    <Compile Include="Async.fs"  />
-    <Compile Include="Types.fs"  />
-    <Compile Include="Actor.fs"  />
-    <Compile Include="Logger.fs" />
-    <Compile Include="Kernel.fs" />
-    <Compile Include="Graph/Node.fs" />
-    <Compile Include="Graph/NodeR.fs" />
+    <Compile Include="Async.fs"/>
+    <Compile Include="Types.fs"/>
+    <Compile Include="Actor.fs"/>
+    <Compile Include="Logger.fs"/>
+    <Compile Include="Kernel.fs"/>
+    <Compile Include="Graph/Node.fs"/>
+    <Compile Include="Graph/NodeR.fs"/>
   </ItemGroup>
-
 </Project>
