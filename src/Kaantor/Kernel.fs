@@ -70,7 +70,7 @@ module Kernel =
                 | KMsgSend pkts ->
                     pkts
                     |> List.map (toRequestIn >> fwd actors)
-                    |> Async.ureduce
+                    |> Async.reduceU
                     |> Async.RunSynchronously
 
                     return! loop actors

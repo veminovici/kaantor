@@ -5,19 +5,32 @@ namespace Simplee
 [<RequireQualifiedAccessAttribute>]
 module Async =
 
-    /// Chains two async expressions which return unit. The composes
-    /// async expression will also return the unit.
-    let private chain (x: Async<unit>) (y: Async<unit>) = async {
-        do! x
-        do! y }
+    let private rtrn = async.Return
 
-    /// Reduces a list of async expressions which return unit to one
-    /// async expression which also returns unit.
-    let ureduce (xs: Async<unit> list) =
-        xs
-        |> List.reduce chain
+    let private reducer f (x: Async<'a>) (y: Async<'a>) : Async<'a> = async {
+        let! x = x
+        let! y = y
+        return f x y }
+
+    let reduce f (xs: Async<'a> list) = xs |> List.reduce f
+
+    let private reducerU = reducer (fun _ _ -> ())
+
+    let reduceU = reduce reducerU
 
     /// Maps the result of an async expression using a given function.
     let map f a = async {
         let! r = a
         return f r }
+
+    /// Applies a function to an async flow.
+    let apply f a = async {
+        let! f = f
+        let! a = a
+        return f a }
+
+    /// Maps the results of two async flows.
+    let map2 f x y = apply (apply (rtrn f) x) y
+
+    /// Zips the results of two async flows.
+    let zip x y = map2 (fun x y -> x, y) x y
