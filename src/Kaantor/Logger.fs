@@ -76,14 +76,14 @@ module Logger =
 
         let postInfo s = s |> MsgInfo |> postMe
         let postErr  s = s |> MsgErr  |> postMe 
-        let postLogs   = let tcs = TaskCompletionSource<LEntry list>() in tcs |> MsgLogs |> postMe |> Async.bind (fun _ -> tcs.Task |> Async.AwaitTask)
+        let postLogs () = let tcs = TaskCompletionSource<LEntry list>() in tcs |> MsgLogs |> postMe |> Async.bind (fun _ -> tcs.Task |> Async.AwaitTask)
 
         /// The ILogger implementation.
         { new ILogger with 
             member _.Aid      = iActor.Aid 
             member _.Info msg = postInfo msg
             member _.Err msg  = postErr msg
-            member _.Logs     = postLogs }
+            member _.Logs     = postLogs () }
 
     /// Add new error log entry
     let err msg (l: ILogger) = l.Err msg

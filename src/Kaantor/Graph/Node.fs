@@ -67,10 +67,10 @@ module Node =
         let postMe pld = IActorSink.postMe aid pld iActorSink
 
         let postAddEdge edge = edge |> MsgAddEdge |> postMe
-        let postEdges = let tcs = TaskCompletionSource<Edge list>() in tcs |> MsgEdges |> postMe |> Async.bind (fun _ -> tcs.Task |> Async.AwaitTask)
+        let postEdges () = let tcs = TaskCompletionSource<Edge list>() in tcs |> MsgEdges |> postMe |> Async.bind (fun _ -> tcs.Task |> Async.AwaitTask)
 
         /// The ILogger implementation.
         { new INode with 
             member _.Aid          = iActor.Aid
             member _.AddEdge edge = edge |> postAddEdge
-            member _.Edges        = postEdges }
+            member _.Edges        = postEdges () }
