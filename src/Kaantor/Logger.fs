@@ -70,7 +70,7 @@ module Logger =
 
         /// Create the actor, using the defined handlers, 
         /// and the initial empty list of log entries.
-        let iActor, iActorSink, ksend = Actor.make krnl rcv Stt.Empty aid
+        let iActor, iActorSink = Actor.make krnl rcv Stt.Empty aid
 
         let postMe pld = IActorSink.postMe aid pld iActorSink
 

@@ -94,3 +94,8 @@ module IActorSink =
         |> DMessage.withMe aid 
         |> DMessage.withPld pld 
         |> sink.Post
+
+[<RequireQualifiedAccess>]
+module Log = 
+    let err  txt (k: IKernel) = let lgr = k.Logger in lgr.Err  txt
+    let info txt (k: IKernel) = let lgr = k.Logger in lgr.Info txt

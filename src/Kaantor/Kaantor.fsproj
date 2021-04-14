@@ -29,6 +29,7 @@
     <Compile Include="Actor.fs"/>
     <Compile Include="Logger.fs"/>
     <Compile Include="Kernel.fs"/>
+    <Compile Include="Rebounder.fs"/>
     <Compile Include="Graph/Node.fs"/>
     <Compile Include="Graph/NodeR.fs"/>
   </ItemGroup>

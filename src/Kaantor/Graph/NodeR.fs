@@ -51,18 +51,18 @@ module NodeR =
         let rcv (msg: DMessage) (NodeRState edges) =
             match msg with
             | AddEdge edge -> 
-                let msg, stt = [], edge :: edges |> NodeRState
-                (msg, stt) |> async.Return
+                let msgs, stt = [], edge :: edges |> NodeRState
+                (msgs, stt) |> async.Return
             | Edges tcs -> 
                 tcs.SetResult edges
-                let msg, stt = [], (NodeRState edges)
-                (msg, stt) |> async.Return
+                let msgs, stt = [], (NodeRState edges)
+                (msgs, stt) |> async.Return
             | _ -> 
                 hmsg msg (NodeRState edges)
 
         /// Create the actor, using the defined handlers, 
         /// and the initial empty list of log entries.
-        let iActor, iActorSink, ksend = Actor.make krnl rcv NodeRState.Empty aid
+        let iActor, iActorSink = Actor.make krnl rcv NodeRState.Empty aid
 
         let postMe pld = IActorSink.postMe aid pld iActorSink
 

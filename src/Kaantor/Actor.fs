@@ -17,6 +17,9 @@ module Actor =
     /// The actor uses the given handlers to process the incoming requests and the api calls.
     let make (krnl: IKernel) (rcv: DReceiveMessage<'TState>) (zro: 'TState) aid =
 
+        let err  txt = Log.err  txt krnl
+        let info txt = Log.info txt krnl
+
         let mutable ksend = Unchecked.defaultof<KernelSendFn>
 
         let mbox = MailboxProcessor.Start(fun inbox ->
@@ -28,6 +31,7 @@ module Actor =
                     /// The actor received a message from the kernel.
                     | AMsgReceive msg -> 
                         let! msgs, stt' = rcv msg stt
+                        do! ksend msgs
                         return! loop stt'
                 with
                 | e -> printfn "Error: %O" e }
@@ -61,5 +65,5 @@ module Actor =
 
         /// Return the public interface and the function
         /// that helps the actor send the messages.
-        iActor, iActorSink, ksend
+        iActor, iActorSink
 

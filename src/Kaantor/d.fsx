@@ -14,10 +14,10 @@ printfn "Starting testing"
 let krnl = Kernel.make ()
 
 krnl |> Kernel.err "test1" |> Async.RunSynchronously
-krnl |> Kernel.err "test2" |> Async.RunSynchronously
-krnl |> Kernel.err "test3" |> Async.RunSynchronously
-krnl |> Kernel.err "test4" |> Async.RunSynchronously
-krnl |> Kernel.err "test5" |> Async.RunSynchronously
+//krnl |> Kernel.err "test2" |> Async.RunSynchronously
+//krnl |> Kernel.err "test3" |> Async.RunSynchronously
+//krnl |> Kernel.err "test4" |> Async.RunSynchronously
+//krnl |> Kernel.err "test5" |> Async.RunSynchronously
 krnl |> Kernel.logs |> Async.RunSynchronously |> printfn "Logs: %O"
 
 printfn "Ended testing"
