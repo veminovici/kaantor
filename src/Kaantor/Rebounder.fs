@@ -14,11 +14,13 @@ module Rebounder =
         with
         static member Empty = RebounderState 0
 
-    let make (krnl: IKernel) hmsg aid =
+    let make (krnl: IKernel) =
+
+        let aid = AID "sys:rebounder"
 
         /// Called when the logger receive a request.
         let rcv (msg: DMessage) (RebounderState rs) =
-            let msgs, stt = [], (RebounderState (rs + 1))
+            let msgs, stt = [DMessage.flip msg], (RebounderState (rs + 1))
             (msgs, stt) |> async.Return
 
         /// Create the actor, using the defined handlers, 

@@ -75,6 +75,8 @@ module Header =
     let withTo   tid h = { h with Tid = tid }
     let toMe     aid   = Header.Empty |> withFrom (FID aid) |> withTo (TID aid)
 
+    let flip h = let (FID fid), (TID tid) = h.Fid, h.Tid in { Fid = (FID tid); Tid = (TID fid)}
+
 [<RequireQualifiedAccess>]
 module DMessage =
 
@@ -85,6 +87,8 @@ module DMessage =
     let withPld  pld m = { m with Pld = PLD pld }
 
     let pld m = let (PLD pld) = m.Pld in pld
+
+    let flip m = { m with Hdr = Header.flip m.Hdr }
 
 [<RequireQualifiedAccess>]
 module IActorSink = 
