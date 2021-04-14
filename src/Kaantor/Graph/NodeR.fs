@@ -64,7 +64,7 @@ module NodeR =
         /// and the initial empty list of log entries.
         let iActor, iActorSink = Actor.make krnl rcv NodeRState.Empty aid
 
-        let postMe pld = IActorSink.postMe aid pld iActorSink
+        let postMe = IActorSink.postMe iActorSink
 
         let postAddEdge edge = edge |> MsgAddEdge |> postMe
         let postEdges () = let tcs = TaskCompletionSource<EdgeR list>() in tcs |> MsgEdges |> postMe |> Async.bind (fun _ -> tcs.Task |> Async.AwaitTask)

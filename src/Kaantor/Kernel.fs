@@ -25,6 +25,7 @@ module Kernel =
         let mutable mbox : MailboxProcessor<Msg> = Unchecked.defaultof<MailboxProcessor<Msg>>
         let mutable lgr : ILogger = Unchecked.defaultof<ILogger>
 
+        let info txt = lgr.Info txt
         let postDeliver msg = msg |> MsgDeliver |> mbox.Post
 
         // create the mailbox.
@@ -42,12 +43,14 @@ module Kernel =
                     tcs.SetResult ksend
                     return! loop (Stt sinks)
                 | MsgDeliver msg ->
+                    do! info $"Kernel delivering {msg}"
                     return! 
                         sinks
                         |> List.find (fun snk -> (TID snk.Aid) = msg.Hdr.Tid)
-                        |> fun snk -> snk.Post msg
+                        |> fun snk -> 
+                            snk.Post msg
                         |> Async.bind (fun _ -> loop (Stt sinks)) }
-            
+
             loop Stt.Empty)
 
         let register sink =

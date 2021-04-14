@@ -7,16 +7,13 @@ type IRebounder =
 [<RequireQualifiedAccess>]
 module Rebounder =
 
-    open Simplee
-    open System.Threading.Tasks
-
     type private RebounderState = RebounderState of int
         with
         static member Empty = RebounderState 0
 
     let make (krnl: IKernel) =
 
-        let aid = AID "sys:rebounder"
+        let aid = Sys.Ids.Rebounder
 
         /// Called when the logger receive a request.
         let rcv (msg: DMessage) (RebounderState rs) =

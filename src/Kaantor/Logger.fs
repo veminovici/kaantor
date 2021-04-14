@@ -50,7 +50,7 @@ module Logger =
     /// Create a new logger actors using a given kernel
     let make (krnl: IKernel) =
 
-        let aid = AID "sys:logger"
+        let aid = Sys.Ids.Logger
 
         /// Called when the logger receive a request.
         let rcv (msg: DMessage) (Stt logs) =
@@ -72,7 +72,7 @@ module Logger =
         /// and the initial empty list of log entries.
         let iActor, iActorSink = Actor.make krnl rcv Stt.Empty aid
 
-        let postMe pld = IActorSink.postMe aid pld iActorSink
+        let postMe = IActorSink.postMe iActorSink
 
         let postInfo s = s |> MsgInfo |> postMe
         let postErr  s = s |> MsgErr  |> postMe 

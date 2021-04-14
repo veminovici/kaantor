@@ -15,6 +15,10 @@ type ToId    = TID of ActorId with
     static member Empty = TID ActorId.Empty
     override this.ToString() = let (TID (AID i)) = this in i
 
+type SessionId = SID of string with
+    static member Empty = SID ""
+    override this.ToString() = let (SID i) = this in i
+
 /// The header of the message
 type Header = {
     Fid: FromId
@@ -93,7 +97,8 @@ module DMessage =
 [<RequireQualifiedAccess>]
 module IActorSink = 
 
-    let postMe aid pld (sink: IActorSink) = 
+    let postMe (sink: IActorSink) pld = 
+        let aid = sink.Aid in
         DMessage.Empty 
         |> DMessage.withMe aid 
         |> DMessage.withPld pld 
@@ -103,3 +108,11 @@ module IActorSink =
 module Log = 
     let err  txt (k: IKernel) = let lgr = k.Logger in lgr.Err  txt
     let info txt (k: IKernel) = let lgr = k.Logger in lgr.Info txt
+
+[<RequireQualifiedAccess>]
+module Sys =
+
+    [<RequireQualifiedAccess>]
+    module Ids =
+        let Logger    = AID "sys:logger"
+        let Rebounder = AID "sys:rebounder"
