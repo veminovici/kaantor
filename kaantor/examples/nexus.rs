@@ -1,7 +1,7 @@
 use std::fmt::Debug;
 
 use actix::prelude::*;
-use kaantor::{nexus, ActorId, KActor, ProtocolMsg, SenderId, SessionId};
+use kaantor::{nexus, ActorId, IntoActorId, ProtocolMsg, SenderId, SessionId};
 use log::debug;
 
 struct MyActor(pub ActorId);
@@ -10,9 +10,9 @@ impl Actor for MyActor {
     type Context = Context<Self>;
 }
 
-impl KActor for MyActor {
-    fn aid(&self) -> &ActorId {
-        &self.0
+impl IntoActorId for MyActor {
+    fn aid(&self) -> ActorId {
+        self.0
     }
 }
 
@@ -42,7 +42,8 @@ impl Handler<ProtocolMsg<MyPayload>> for MyActor {
     type Result = ResponseActFuture<Self, <MyPayload as Message>::Result>;
 
     fn handle(&mut self, msg: ProtocolMsg<MyPayload>, _ctx: &mut Self::Context) -> Self::Result {
-        let me = *self.aid();
+        let me = self.aid();
+
         async move {
             debug!(
                 "RCVD | {:?} >> {:?} | {:?} | {:?}",
@@ -52,7 +53,6 @@ impl Handler<ProtocolMsg<MyPayload>> for MyActor {
                 msg.payload()
             );
 
-            // println!("{:?} handles async", me);
             let ns = nexus::get_neighbours::<MyPayload>(me).await.unwrap();
             println!("RCVD | {:?} | PING | ns={:?}", me, ns);
 

@@ -6,6 +6,6 @@ mod protocol;
 pub use ids::*;
 pub use protocol::*;
 
-pub trait KActor {
-    fn aid(&self) -> &ActorId;
+pub trait IntoActorId {
+    fn aid(&self) -> ActorId;
 }

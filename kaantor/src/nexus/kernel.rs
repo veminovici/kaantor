@@ -3,7 +3,7 @@ use log::info;
 
 use crate::{
     graph::{Graph, Node},
-    ActorId, KActor, ProtocolPxy,
+    ActorId, IntoActorId, ProtocolPxy,
 };
 
 use super::message::{AddBiEdge, AddNode, GetNeighbours};
@@ -24,9 +24,9 @@ impl<P: Send> Default for Kernel<P> {
     }
 }
 
-impl<P: Send> KActor for Kernel<P> {
-    fn aid(&self) -> &ActorId {
-        &self.aid
+impl<P: Send> IntoActorId for Kernel<P> {
+    fn aid(&self) -> ActorId {
+        self.aid
     }
 }
 
