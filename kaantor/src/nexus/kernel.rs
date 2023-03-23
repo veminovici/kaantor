@@ -1,12 +1,13 @@
 use actix::prelude::*;
 use log::info;
+use std::fmt::Debug;
 
 use crate::{
     graph::{Graph, Node},
     ActorId, IntoActorId, ProtocolPxy,
 };
 
-use super::message::{AddBiEdge, AddNode, GetNeighbours};
+use super::message::{AddBiEdge, AddNode, GetNeighbours, SendPayload};
 
 pub(crate) struct Kernel<P: Send> {
     aid: ActorId,
@@ -51,7 +52,7 @@ impl<P: Send + Unpin + 'static> Handler<GetNeighbours> for Kernel<P> {
             self.proxies.len()
         );
 
-        self.graph.neighbours(*aid).map(|aid| *aid).collect()
+        self.graph.neighbours(*aid).copied().collect()
     }
 }
 
@@ -71,7 +72,7 @@ impl<P: Send + Unpin + 'static> Handler<AddNode<P>> for Kernel<P> {
         let pxy = msg.into_proxy();
         self.proxies.push(pxy);
 
-        let node = Node::new(aid.into());
+        let node = Node::new(aid);
         self.graph.add_node(node);
     }
 }
@@ -91,5 +92,18 @@ impl<P: Send + Unpin + 'static> Handler<AddBiEdge> for Kernel<P> {
         let a = *msg.a();
         let b = *msg.b();
         self.graph.add_biedge(a, b);
+    }
+}
+
+impl<P: Debug + Send + Unpin + 'static> Handler<SendPayload<P>> for Kernel<P> {
+    type Result = <SendPayload<P> as Message>::Result;
+
+    fn handle(&mut self, msg: SendPayload<P>, _ctx: &mut Self::Context) -> Self::Result {
+        info!(
+            "RCVD | {:?} >> {:?} | SEND | {:?}",
+            self.aid(),
+            msg.to(),
+            msg.payload()
+        )
     }
 }

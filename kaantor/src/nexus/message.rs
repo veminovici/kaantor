@@ -1,3 +1,5 @@
+use std::fmt::Debug;
+
 use crate::{ActorId, ProtocolMsg, ProtocolPxy};
 use actix::prelude::*;
 
@@ -53,5 +55,40 @@ impl AddBiEdge {
 
     pub fn b(&self) -> &ActorId {
         &self.1
+    }
+}
+
+pub(crate) enum SendTo {
+    Actor(ActorId),
+    All,
+    AllExcept(Vec<ActorId>),
+}
+
+impl Debug for SendTo {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Self::Actor(aid) => write!(f, "{aid:?}"),
+            Self::All => write!(f, "ALL"),
+            Self::AllExcept(_) => write!(f, "A--"),
+        }
+    }
+}
+
+/// A message to trigger a send the payload.
+#[derive(Message)]
+#[rtype(result = "()")]
+pub(crate) struct SendPayload<P>(ActorId, SendTo, P);
+
+impl<P> SendPayload<P> {
+    pub fn new(from: ActorId, to: SendTo, pld: P) -> Self {
+        Self(from, to, pld)
+    }
+
+    pub fn to(&self) -> &SendTo {
+        &self.1
+    }
+
+    pub fn payload(&self) -> &P {
+        &self.2
     }
 }
