@@ -29,7 +29,7 @@ impl Handler<ProtocolMsg<MyPayload>> for MyActor {
         let me = self.0;
         async move {
             println!("{:?} handles async", me);
-            let ns = nexus::get_neighbours::<usize>(me).await.unwrap();
+            let ns = nexus::get_neighbours::<MyPayload>(me).await.unwrap();
             println!("{:?} processed ns={:?}", me, ns);
             () // this is the <Ping as Message>::Result.
         }

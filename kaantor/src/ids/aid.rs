@@ -18,7 +18,7 @@ impl Debug for ActorId {
 
 impl Default for ActorId {
     fn default() -> Self {
-        ActorId::KrnlId("app")
+        ActorId::KrnlId("USER")
     }
 }
 
