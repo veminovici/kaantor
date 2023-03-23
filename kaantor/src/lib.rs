@@ -1,3 +1,4 @@
+pub(crate) mod graph;
 mod ids;
 pub mod nexus;
 mod protocol;

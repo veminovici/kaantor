@@ -52,8 +52,9 @@ impl Handler<ProtocolMsg<MyPayload>> for MyActor {
                 msg.payload()
             );
 
-            println!("{:?} handles async", me);
-            let _ns = nexus::get_neighbours::<MyPayload>(me).await.unwrap();
+            // println!("{:?} handles async", me);
+            let ns = nexus::get_neighbours::<MyPayload>(me).await.unwrap();
+            println!("RCVD | {:?} | PING | ns={:?}", me, ns);
 
             () // this is the <Ping as Message>::Result.
         }
@@ -82,8 +83,13 @@ fn main() {
         let node2 = create(aid2);
         let _ = nexus::add_node(aid2, &node2).await;
 
+        let aid3 = ActorId::from(3);
+        let node3 = create(aid3);
+        let _ = nexus::add_node(aid3, &node3).await;
+
         // Create the edges between the nodes
         let _ = nexus::add_edge::<MyPayload>(aid1, aid2).await;
+        let _ = nexus::add_edge::<MyPayload>(aid1, aid3).await;
 
         // start the protocol
         let sid = SenderId::from(ActorId::default());
