@@ -1,5 +1,5 @@
 use actix::prelude::*;
-use log::{debug, info};
+use log::info;
 
 use crate::{ActorId, ProtocolPxy};
 
