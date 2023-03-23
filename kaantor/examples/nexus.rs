@@ -1,11 +1,19 @@
+use std::fmt::Debug;
+
 use actix::prelude::*;
-use kaantor::{nexus, ActorId, ProtocolMsg, SenderId, SessionId};
+use kaantor::{nexus, ActorId, KActor, ProtocolMsg, SenderId, SessionId};
 use log::debug;
 
 struct MyActor(pub ActorId);
 
 impl Actor for MyActor {
     type Context = Context<Self>;
+}
+
+impl KActor for MyActor {
+    fn aid(&self) -> &ActorId {
+        &self.0
+    }
 }
 
 enum MyPayload {
@@ -18,6 +26,14 @@ impl Default for MyPayload {
     }
 }
 
+impl Debug for MyPayload {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Self::Ping => write!(f, "PING"),
+        }
+    }
+}
+
 impl Message for MyPayload {
     type Result = ();
 }
@@ -25,12 +41,20 @@ impl Message for MyPayload {
 impl Handler<ProtocolMsg<MyPayload>> for MyActor {
     type Result = ResponseActFuture<Self, <MyPayload as Message>::Result>;
 
-    fn handle(&mut self, _msg: ProtocolMsg<MyPayload>, _ctx: &mut Self::Context) -> Self::Result {
-        let me = self.0;
+    fn handle(&mut self, msg: ProtocolMsg<MyPayload>, _ctx: &mut Self::Context) -> Self::Result {
+        let me = *self.aid();
         async move {
+            debug!(
+                "RCVD | {:?} >> {:?} | {:?} | {:?}",
+                msg.sid(),
+                me,
+                msg.kid(),
+                msg.payload()
+            );
+
             println!("{:?} handles async", me);
             let ns = nexus::get_neighbours::<MyPayload>(me).await.unwrap();
-            println!("{:?} processed ns={:?}", me, ns);
+
             () // this is the <Ping as Message>::Result.
         }
         .into_actor(self)
@@ -49,7 +73,6 @@ fn main() {
 
     // initialize system
     let _code = System::new().block_on(async {
-
         // Create the nodes
         let aid1 = ActorId::from(1);
         let node1 = create(aid1);
@@ -63,7 +86,7 @@ fn main() {
         let _ = nexus::add_edge::<MyPayload>(aid1, aid2).await;
 
         // start the protocol
-        let sid = SenderId::from(aid1);
+        let sid = SenderId::from(ActorId::default());
         let kid = SessionId::from(10);
         let msg = ProtocolMsg::new(sid, kid, MyPayload::Ping);
 

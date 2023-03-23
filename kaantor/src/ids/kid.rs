@@ -6,7 +6,7 @@ pub struct SessionId(usize);
 
 impl Debug for SessionId {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "K{}", self.0)
+        write!(f, "K{:03}", self.0)
     }
 }
 
