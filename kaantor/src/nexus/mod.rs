@@ -28,3 +28,12 @@ where
     let msg = message::AddNode::new(aid, recipient);
     kernel.send(msg).await.map_err(|e| anyhow!(e))
 }
+
+pub async fn add_edge<P>(a: ActorId, b: ActorId) -> Result<()>
+where
+    P: Send + Unpin + 'static,
+{
+    let kernel = Kernel::<P>::from_registry();
+    let msg = message::AddBiEdge::new(a, b);
+    kernel.send(msg).await.map_err(|e| anyhow!(e))
+}
