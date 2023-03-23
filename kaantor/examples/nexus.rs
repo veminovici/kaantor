@@ -53,7 +53,7 @@ impl Handler<ProtocolMsg<MyPayload>> for MyActor {
             );
 
             println!("{:?} handles async", me);
-            let ns = nexus::get_neighbours::<MyPayload>(me).await.unwrap();
+            let _ns = nexus::get_neighbours::<MyPayload>(me).await.unwrap();
 
             () // this is the <Ping as Message>::Result.
         }
