@@ -68,11 +68,7 @@ impl<P: Copy + Debug + Send + Unpin + 'static> Handler<SendPayload<P>> for Proxi
         let from = msg.from();
 
         let proxies: Vec<_> = match msg.to() {
-            SendTo::Actor(aid) => self
-                .proxies
-                .iter()
-                .filter(|pxy| pxy.aid() == aid)
-                .collect(),
+            SendTo::Actor(aid) => self.proxies.iter().filter(|pxy| pxy.aid() == aid).collect(),
             SendTo::All => self
                 .proxies
                 .iter()
