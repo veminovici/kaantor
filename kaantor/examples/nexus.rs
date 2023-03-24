@@ -74,24 +74,26 @@ fn main() {
 
     // initialize system
     let _code = System::new().block_on(async {
-        // Create the nodes
+        // STEP 1: Create the nodes
         let aid1 = ActorId::from(1);
         let node1 = create(aid1);
-        let _ = nexus::add_proxy(aid1, &node1).await;
 
         let aid2 = ActorId::from(2);
         let node2 = create(aid2);
-        let _ = nexus::add_proxy(aid2, &node2).await;
 
         let aid3 = ActorId::from(3);
         let node3 = create(aid3);
-        let _ = nexus::add_proxy(aid3, &node3).await;
 
-        // Create the edges between the nodes
+        // STEP 2: Create the edges between the nodes
         let _ = nexus::add_edge::<MyPayload>(aid1, aid2).await;
         let _ = nexus::add_edge::<MyPayload>(aid1, aid3).await;
 
-        // start the protocol
+        // STEP 3: Add the proxies
+        let _ = nexus::add_proxy(aid1, &node1).await;
+        let _ = nexus::add_proxy(aid2, &node2).await;
+        let _ = nexus::add_proxy(aid3, &node3).await;
+
+        // STEP 4: Start the protocol
         let sid = SenderId::from(ActorId::default());
         let kid = SessionId::from(10);
         let msg = ProtocolMsg::new(sid, kid, MyPayload::Ping);
