@@ -3,7 +3,7 @@ use kaantor::{nexus, ActorId, IntoActorId, Node, ProtocolMsg};
 use log::{debug, info};
 use std::fmt::Debug;
 
-struct MyActor(pub ActorId);
+struct MyActor(ActorId);
 
 impl Actor for MyActor {
     type Context = Context<Self>;
@@ -97,7 +97,7 @@ impl Handler<ProtocolMsg<MyPayload2>> for MyActor {
 
 fn main() {
     env_logger::init();
-    debug!("Starting the example NEXUS_GET");
+    info!("Starting the example NEXUS_GET");
 
     async fn create(aid: ActorId) -> Node<MyActor> {
         let node = MyActor::from(aid);
