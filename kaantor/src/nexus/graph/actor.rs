@@ -1,12 +1,13 @@
-use crate::{graph::Graph, ActorId, IntoActorId};
+use crate::{ActorId, IntoActorId};
 use actix::prelude::*;
+use kaantor_graph::Graph;
 use log::info;
 
 use super::message::{AddBiEdge, GetNeighbours};
 
 pub struct GraphActor {
     aid: ActorId,
-    graph: Graph,
+    graph: Graph<ActorId>,
 }
 
 impl Default for GraphActor {
