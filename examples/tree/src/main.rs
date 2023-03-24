@@ -1,3 +1,4 @@
+extern crate kaantor_graph;
 use kaantor_graph::{Node, Tree};
 
 fn main() {

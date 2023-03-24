@@ -49,6 +49,7 @@ impl<K> Tree<K> {
     }
 }
 
+#[cfg(feature = "pretty")]
 impl<K: Debug + PartialEq> Tree<K> {
     fn pretty_print_node<'a>(&self, tb: &'a mut TreeBuilder, key: &K) -> &'a mut TreeBuilder {
         self.nodes
