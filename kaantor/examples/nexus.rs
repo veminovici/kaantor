@@ -53,11 +53,7 @@ impl Handler<ProtocolMsg<MyPayload>> for MyActor {
 
         info!(
             "{:?} || RCVD | {:?} >> {:?} | {:?} | {:?}",
-            me,
-            sid,
-            me,
-            kid,
-            msg.payload()
+            &me, &sid, &me, &kid, &pld
         );
 
         async move {
