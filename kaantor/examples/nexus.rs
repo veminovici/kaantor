@@ -49,6 +49,7 @@ impl Handler<ProtocolMsg<MyPayload>> for MyActor {
         let me = self.aid();
         let kid = *msg.kid();
         let sid = *msg.sid();
+        let pld = *msg.payload();
 
         info!(
             "{:?} || RCVD | {:?} >> {:?} | {:?} | {:?}",
@@ -60,13 +61,13 @@ impl Handler<ProtocolMsg<MyPayload>> for MyActor {
         );
 
         async move {
-            match msg.payload() {
+            match pld {
                 MyPayload::Start(tkn) => {
-                    let _ = nexus::send_to_all_neighbours(me, kid, MyPayload::Ping(*tkn)).await;
+                    let _ = nexus::send_to_all_neighbours(me, kid, MyPayload::Ping(tkn)).await;
                 }
                 MyPayload::Ping(tkn) => {
                     let to = sid.aid();
-                    let _ = nexus::send_to_actor(me, to, kid, MyPayload::Pong(*tkn + 1)).await;
+                    let _ = nexus::send_to_actor(me, to, kid, MyPayload::Pong(tkn + 1)).await;
                 }
                 MyPayload::Pong(tkn) => {
                     debug!("{:?} || DONE | {:04?}", me, tkn);
