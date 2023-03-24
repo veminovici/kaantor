@@ -1,8 +1,11 @@
 use actix::prelude::*;
 use kaantor::{nexus, ActorId, IntoActorId, Node, ProtocolMsg};
+use kaantor_derive::BuildActor;
 use log::{debug, info};
 use std::fmt::Debug;
 
+#[derive(BuildActor)]
+#[payload(MyPayload, MyPayload2)]
 struct MyActor(ActorId);
 
 impl Actor for MyActor {
@@ -99,23 +102,21 @@ fn main() {
     env_logger::init();
     info!("Starting the example NEXUS_GET");
 
-    async fn create(aid: ActorId) -> Node<MyActor> {
-        let node = MyActor::from(aid);
-        let addr = node.start();
-
-        let node = Node::new(aid, addr);
-        let _ = node.register_proxy::<MyPayload>().await;
-        let _ = node.register_proxy::<MyPayload2>().await;
-
-        node
-    }
+    // async fn create(aid: ActorId) -> Node<MyActor> {
+    //     let node = MyActor::from(aid);
+    //     let addr = node.start();
+    //     let node = Node::new(aid, addr);
+    //     let _ = node.register_proxy::<MyPayload>().await;
+    //     let _ = node.register_proxy::<MyPayload2>().await;
+    //     node
+    // }
 
     // initialize system
     let _code = System::new().block_on(async {
         // STEP 1: Create the nodes
-        let node1 = create(1.into()).await;
-        let node2 = create(2.into()).await;
-        let node3 = create(3.into()).await;
+        let node1 = MyActor::build(1.into()).await;
+        let node2 = MyActor::build(2.into()).await;
+        let node3 = MyActor::build(3.into()).await;
 
         // STEP 2: Create the edges between the nodes
         let _ = nexus::add_edge::<MyPayload>(node1.aid(), node2.aid()).await; // 1 - 2
