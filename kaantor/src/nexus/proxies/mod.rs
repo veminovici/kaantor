@@ -7,7 +7,7 @@ use std::fmt::Debug;
 mod actor;
 mod message;
 
-pub async fn add_proxy<A, P>(aid: ActorId, addr: &Addr<A>) -> Result<()>
+pub(crate) async fn add_proxy<A, P>(aid: ActorId, addr: &Addr<A>) -> Result<()>
 where
     A: Actor,
     A: Handler<ProtocolMsg<P>>,

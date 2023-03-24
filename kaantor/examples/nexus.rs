@@ -1,7 +1,7 @@
 use std::fmt::Debug;
 
 use actix::prelude::*;
-use kaantor::{nexus, ActorId, IntoActorId, ProtocolMsg, SenderId, SessionId};
+use kaantor::{nexus, ActorId, IntoActorId, Node, ProtocolMsg, SenderId, SessionId};
 use log::debug;
 
 struct MyActor(pub ActorId);
@@ -67,9 +67,11 @@ fn main() {
     env_logger::init();
     debug!("Starting the example NEXUS_GET");
 
-    fn create(aid: ActorId) -> Addr<MyActor> {
+    fn create(aid: ActorId) -> Node<MyActor> {
         let node = MyActor(aid);
-        node.start()
+        let addr = node.start();
+
+        Node::new(aid, addr)
     }
 
     // initialize system
@@ -85,19 +87,17 @@ fn main() {
         let node3 = create(aid3);
 
         // STEP 2: Create the edges between the nodes
-        let _ = nexus::add_edge::<MyPayload>(aid1, aid2).await;
-        let _ = nexus::add_edge::<MyPayload>(aid1, aid3).await;
+        let _ = nexus::add_edge::<MyPayload>(node1.aid(), node2.aid()).await;
+        let _ = nexus::add_edge::<MyPayload>(node1.aid(), node3.aid()).await;
 
         // STEP 3: Add the proxies
-        let _ = nexus::add_proxy(aid1, &node1).await;
-        let _ = nexus::add_proxy(aid2, &node2).await;
-        let _ = nexus::add_proxy(aid3, &node3).await;
+        let _ = node1.register_proxy().await;
+        let _ = node2.register_proxy().await;
+        let _ = node3.register_proxy().await;
 
         // STEP 4: Start the protocol
         let sid = SenderId::from(ActorId::default());
         let kid = SessionId::from(10);
-        let msg = ProtocolMsg::new(sid, kid, MyPayload::Ping);
-
-        let _ = node1.send(msg).await;
+        let _ = node1.send(sid, kid, MyPayload::Ping).await;
     });
 }
