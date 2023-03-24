@@ -62,6 +62,26 @@ impl Handler<ProtocolMsg<MyPayload>> for MyActor {
     }
 }
 
+struct MyPayload2;
+
+impl Debug for MyPayload2 {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("MyPayload2").finish()
+    }
+}
+
+impl Message for MyPayload2 {
+    type Result = ();
+}
+
+impl Handler<ProtocolMsg<MyPayload2>> for MyActor {
+    type Result = ResponseActFuture<Self, <MyPayload2 as Message>::Result>;
+
+    fn handle(&mut self, _msg: ProtocolMsg<MyPayload2>, _ctx: &mut Self::Context) -> Self::Result {
+        todo!()
+    }
+}
+
 fn main() {
     env_logger::init();
     debug!("Starting the example NEXUS_GET");
@@ -71,7 +91,8 @@ fn main() {
         let addr = node.start();
 
         let node = Node::new(aid, addr);
-        let _ = node.register_proxy().await;
+        let _ = node.register_proxy::<MyPayload>().await;
+        let _ = node.register_proxy::<MyPayload2>().await;
 
         node
     }
