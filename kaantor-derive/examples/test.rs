@@ -10,7 +10,6 @@ struct MyPayloadB;
 
 #[derive(BuildActor)]
 #[payload(MyPayloadA, MyPayloadB)]
-// #[payload(MyPayloadB)]
 struct MyActor(kaantor::ActorId);
 
 impl ::actix::Actor for MyActor {
@@ -28,7 +27,7 @@ impl actix::Handler<::kaantor::ProtocolMsg<MyPayloadA>> for MyActor {
 
     fn handle(
         &mut self,
-        msg: ::kaantor::ProtocolMsg<MyPayloadA>,
+        _msg: ::kaantor::ProtocolMsg<MyPayloadA>,
         _ctx: &mut Self::Context,
     ) -> Self::Result {
         todo!()
@@ -40,7 +39,7 @@ impl actix::Handler<::kaantor::ProtocolMsg<MyPayloadB>> for MyActor {
 
     fn handle(
         &mut self,
-        msg: ::kaantor::ProtocolMsg<MyPayloadB>,
+        _msg: ::kaantor::ProtocolMsg<MyPayloadB>,
         _ctx: &mut Self::Context,
     ) -> Self::Result {
         todo!()
