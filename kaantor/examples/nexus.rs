@@ -1,5 +1,5 @@
 use actix::prelude::*;
-use kaantor::{nexus, ActorId, IntoActorId, Node, ProtocolMsg, SenderId, SessionId};
+use kaantor::{nexus, ActorId, IntoActorId, Node, ProtocolMsg};
 use log::debug;
 use std::fmt::Debug;
 
@@ -100,22 +100,17 @@ fn main() {
     // initialize system
     let _code = System::new().block_on(async {
         // STEP 1: Create the nodes
-        let aid1 = ActorId::from(1);
-        let node1 = create(aid1).await;
-
-        let aid2 = ActorId::from(2);
-        let node2 = create(aid2).await;
-
-        let aid3 = ActorId::from(3);
-        let node3 = create(aid3).await;
+        let node1 = create(1.into()).await;
+        let node2 = create(2.into()).await;
+        let node3 = create(3.into()).await;
 
         // STEP 2: Create the edges between the nodes
-        let _ = nexus::add_edge::<MyPayload>(node1.aid(), node2.aid()).await;
-        let _ = nexus::add_edge::<MyPayload>(node1.aid(), node3.aid()).await;
+        let _ = nexus::add_edge::<MyPayload>(node1.aid(), node2.aid()).await; // 1 - 2
+        let _ = nexus::add_edge::<MyPayload>(node1.aid(), node3.aid()).await; // 1 - 3
 
         // STEP 3: Start the protocol
-        let sid = SenderId::from(ActorId::default());
-        let kid = SessionId::from(10);
-        let _ = node1.send(sid, kid, MyPayload::Ping).await;
+        let _ = node1
+            .send(10.into(), MyPayload::Ping)
+            .await;
     });
 }

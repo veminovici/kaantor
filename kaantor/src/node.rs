@@ -24,7 +24,7 @@ impl<A: Actor> Node<A> {
         nexus::add_proxy(self.aid, &self.addr).await
     }
 
-    pub async fn send<P>(&self, sid: SenderId, kid: SessionId, pld: P) -> Result<(), MailboxError>
+    async fn send_payload<P>(&self, sid: SenderId, kid: SessionId, pld: P) -> Result<(), MailboxError>
     where
         A: Handler<ProtocolMsg<P>>,
         <A as actix::Actor>::Context: ToEnvelope<A, ProtocolMsg<P>>,
@@ -32,6 +32,15 @@ impl<A: Actor> Node<A> {
     {
         let msg = ProtocolMsg::new(sid, kid, pld);
         self.addr.send(msg).await
+    }
+
+    pub async fn send<P>(&self, kid: SessionId, pld: P) -> Result<(), MailboxError>
+    where
+        A: Handler<ProtocolMsg<P>>,
+        <A as actix::Actor>::Context: ToEnvelope<A, ProtocolMsg<P>>,
+        P: Send + Unpin + 'static,
+    {
+        self.send_payload(Default::default(), kid, pld).await
     }
 }
 
