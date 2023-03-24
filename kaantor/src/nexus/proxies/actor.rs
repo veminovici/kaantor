@@ -4,7 +4,7 @@ use crate::{
 };
 use actix::prelude::*;
 // use futures::future::join_all;
-use log::{debug, info};
+use log::debug;
 use std::fmt::Debug;
 
 pub(crate) struct ProxiesActor<P: Send> {

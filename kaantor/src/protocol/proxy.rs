@@ -52,14 +52,14 @@ impl<P: Send> ProtocolPxy<P> {
         self.recipient.try_send(msg)
     }
 
-    pub async fn send(
-        &self,
-        msg: ProtocolMsg<P>,
-    ) -> Result<<ProtocolMsg<P> as Message>::Result, MailboxError>
-    where
-        P: Debug,
-    {
-        self.debug_msg("ASND", &msg);
-        self.recipient.send(msg).await
-    }
+    // pub async fn send(
+    //     &self,
+    //     msg: ProtocolMsg<P>,
+    // ) -> Result<<ProtocolMsg<P> as Message>::Result, MailboxError>
+    // where
+    //     P: Debug,
+    // {
+    //     self.debug_msg("ASND", &msg);
+    //     self.recipient.send(msg).await
+    // }
 }
