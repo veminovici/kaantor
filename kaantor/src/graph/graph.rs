@@ -24,7 +24,7 @@ impl Graph {
         self.nodes
             .iter_mut()
             .find(|n| n.aid() == &nid)
-            .map(|n| n.add_child(cid))
+            .map(|n| n.add_edge_to(cid))
             .or({
                 let n = Node::with_child(nid, cid);
                 self.nodes.push(n);
@@ -37,8 +37,8 @@ impl Graph {
     pub fn neighbours(&self, nid: ActorId) -> impl Iterator<Item = &ActorId> {
         self.nodes
             .iter()
-            .find(|n| n.aid() == &nid)
-            .map(|n| n.children())
+            .find(|node| node.aid() == &nid)
+            .map(|node| node.neighbours())
             .unwrap()
     }
 }
