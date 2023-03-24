@@ -1,13 +1,19 @@
-use std::fmt::Debug;
-
 use actix::prelude::*;
+use anyhow::Result;
 use kaantor::{nexus, ActorId, IntoActorId, Node, ProtocolMsg, SenderId, SessionId};
 use log::debug;
+use std::fmt::Debug;
 
 struct MyActor(pub ActorId);
 
 impl Actor for MyActor {
     type Context = Context<Self>;
+}
+
+impl From<ActorId> for MyActor {
+    fn from(aid: ActorId) -> Self {
+        Self(aid)
+    }
 }
 
 impl IntoActorId for MyActor {
@@ -18,12 +24,6 @@ impl IntoActorId for MyActor {
 
 enum MyPayload {
     Ping,
-}
-
-impl Default for MyPayload {
-    fn default() -> Self {
-        Self::Ping
-    }
 }
 
 impl Debug for MyPayload {
@@ -67,35 +67,33 @@ fn main() {
     env_logger::init();
     debug!("Starting the example NEXUS_GET");
 
-    fn create(aid: ActorId) -> Node<MyActor> {
-        let node = MyActor(aid);
+    async fn create(aid: ActorId) -> Node<MyActor> {
+        let node = MyActor::from(aid);
         let addr = node.start();
 
-        Node::new(aid, addr)
+        let node = Node::new(aid, addr);
+        let _ = node.register_proxy().await;
+
+        node
     }
 
     // initialize system
     let _code = System::new().block_on(async {
         // STEP 1: Create the nodes
         let aid1 = ActorId::from(1);
-        let node1 = create(aid1);
+        let node1 = create(aid1).await;
 
         let aid2 = ActorId::from(2);
-        let node2 = create(aid2);
+        let node2 = create(aid2).await;
 
         let aid3 = ActorId::from(3);
-        let node3 = create(aid3);
+        let node3 = create(aid3).await;
 
         // STEP 2: Create the edges between the nodes
         let _ = nexus::add_edge::<MyPayload>(node1.aid(), node2.aid()).await;
         let _ = nexus::add_edge::<MyPayload>(node1.aid(), node3.aid()).await;
 
-        // STEP 3: Add the proxies
-        let _ = node1.register_proxy().await;
-        let _ = node2.register_proxy().await;
-        let _ = node3.register_proxy().await;
-
-        // STEP 4: Start the protocol
+        // STEP 3: Start the protocol
         let sid = SenderId::from(ActorId::default());
         let kid = SessionId::from(10);
         let _ = node1.send(sid, kid, MyPayload::Ping).await;
