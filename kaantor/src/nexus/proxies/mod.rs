@@ -1,5 +1,5 @@
 use self::actor::ProxiesActor;
-use crate::{ActorId, ProtocolMsg};
+use crate::{ActorId, ProtocolMsg, SessionId};
 use actix::{dev::ToEnvelope, prelude::*};
 use anyhow::{anyhow, Result};
 use std::fmt::Debug;
@@ -20,36 +20,38 @@ where
     kernel.send(msg).await.map_err(|e| anyhow!(e))
 }
 
-pub async fn send_to_actor<P>(from: ActorId, to: ActorId, pld: P) -> Result<()>
+pub async fn send_to_actor<P>(from: ActorId, to: ActorId, kid: SessionId, pld: P) -> Result<()>
 where
-    P: Debug + Send + Unpin + 'static,
+    P: Copy + Debug + Send + Unpin + 'static,
 {
     let actor = ProxiesActor::<P>::from_registry();
-    let msg = message::SendPayload::new(from, message::SendTo::Actor(to), pld);
+    let msg = message::SendPayload::new(from, message::SendTo::Actor(to), kid, pld);
 
     actor.send(msg).await.map_err(|e| anyhow!(e))
 }
 
-pub async fn send_to_all<P>(from: ActorId, pld: P) -> Result<()>
+pub async fn send_to_all_neighbours<P>(from: ActorId, kid: SessionId, pld: P) -> Result<()>
 where
-    P: Debug + Send + Unpin + 'static,
+    P: Copy + Debug + Send + Unpin + 'static,
 {
     let actor = ProxiesActor::<P>::from_registry();
-    let msg = message::SendPayload::new(from, message::SendTo::All, pld);
+    let msg = message::SendPayload::new(from, message::SendTo::All, kid, pld);
 
     actor.send(msg).await.map_err(|e| anyhow!(e))
 }
 
-pub async fn send_to_all_except<P>(
+pub async fn send_to_all_neighbours_except<P>(
     from: ActorId,
     except: impl Iterator<Item = ActorId>,
+    kid: SessionId,
     pld: P,
 ) -> Result<()>
 where
-    P: Debug + Send + Unpin + 'static,
+    P: Copy + Debug + Send + Unpin + 'static,
 {
     let actor = ProxiesActor::<P>::from_registry();
-    let msg = message::SendPayload::new(from, message::SendTo::AllExcept(except.collect()), pld);
+    let msg =
+        message::SendPayload::new(from, message::SendTo::AllExcept(except.collect()), kid, pld);
 
     actor.send(msg).await.map_err(|e| anyhow!(e))
 }

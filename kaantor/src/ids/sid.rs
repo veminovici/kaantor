@@ -5,6 +5,12 @@ use std::fmt::Debug;
 #[derive(Clone, Copy, Default)]
 pub struct SenderId(ActorId);
 
+impl SenderId {
+    pub fn aid(&self) -> ActorId {
+        self.0
+    }
+}
+
 impl Debug for SenderId {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(f, "{:?}", self.0)

@@ -1,7 +1,10 @@
 use super::message::{AddProxy, SendPayload};
-use crate::{ActorId, IntoActorId, ProtocolPxy};
+use crate::{
+    nexus::proxies::message::SendTo, ActorId, IntoActorId, ProtocolMsg, ProtocolPxy, SenderId,
+};
 use actix::prelude::*;
-use log::info;
+// use futures::future::join_all;
+use log::{debug, info};
 use std::fmt::Debug;
 
 pub(crate) struct ProxiesActor<P: Send> {
@@ -38,7 +41,7 @@ impl<P: Send + Unpin + 'static> Handler<AddProxy<P>> for ProxiesActor<P> {
     fn handle(&mut self, msg: AddProxy<P>, _ctx: &mut Self::Context) -> Self::Result {
         let aid = *msg.aid();
 
-        info!(
+        debug!(
             "RCVD | {:?} >> {:?} | NODE+ | {:?}",
             ActorId::default(),
             self.aid(),
@@ -50,15 +53,65 @@ impl<P: Send + Unpin + 'static> Handler<AddProxy<P>> for ProxiesActor<P> {
     }
 }
 
-impl<P: Debug + Send + Unpin + 'static> Handler<SendPayload<P>> for ProxiesActor<P> {
+impl<P: Copy + Debug + Send + Unpin + 'static> Handler<SendPayload<P>> for ProxiesActor<P> {
     type Result = <SendPayload<P> as Message>::Result;
 
     fn handle(&mut self, msg: SendPayload<P>, _ctx: &mut Self::Context) -> Self::Result {
-        info!(
-            "RCVD | {:?} >> {:?} | SEND | {:?}",
-            self.aid(),
+        debug!(
+            "{:?} || RCVD | {:?} >> {:?} | {:?}",
+            self.aid,
+            msg.from(),
             msg.to(),
             msg.payload()
-        )
+        );
+
+        let from = msg.from();
+
+        let proxies: Vec<_> = match msg.to() {
+            SendTo::Actor(aid) => self
+                .proxies
+                .iter()
+                .filter(|pxy| pxy.aid() == aid)
+                .collect(),
+            SendTo::All => self
+                .proxies
+                .iter()
+                .filter(|pxy| *pxy.aid() != from)
+                .collect(),
+            SendTo::AllExcept(es) => self
+                .proxies
+                .iter()
+                .filter(|pxy| {
+                    let aid = *pxy.aid();
+                    aid != from && !es.contains(&aid)
+                })
+                .collect(),
+        };
+
+        let _: Vec<_> = proxies
+            .iter()
+            .map(|pxy| {
+                let sid = SenderId::from(from);
+                // let to = pxy.aid();
+                let kid = msg.kid();
+                let pld = msg.payload();
+
+                // debug!(
+                //     "{:?} || SEND | {:?} >> {:?} | {:?} | {:?}",
+                //     self.aid, sid, to, kid, pld,
+                // );
+
+                let msg = ProtocolMsg::new(sid, kid, *pld);
+                let _ = pxy.try_send(msg);
+            })
+            .collect();
+
+        // let futures = self.proxies.iter().map(|pxy| {
+        //     let msg = ProtocolMsg::new(sid, kid, pld);
+        //     pxy.send(msg)
+        // });
+
+        //let fut = join_all(futures);
+        //let _ = fut.into_actor(self).boxed_local();
     }
 }

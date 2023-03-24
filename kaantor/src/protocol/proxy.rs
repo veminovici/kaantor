@@ -31,7 +31,8 @@ impl<P: Send> ProtocolPxy<P> {
         P: Debug,
     {
         debug!(
-            "{} | {:?} -> {:?} | {:?} |> {:?}",
+            "APXY:{:04?} || {} | {:?} -> {:?} | {:?} |> {:?}",
+            self.aid,
             pfx,
             msg.sid(),
             self.aid,
@@ -47,7 +48,7 @@ impl<P: Send> ProtocolPxy<P> {
     where
         P: Debug,
     {
-        self.debug_msg("SEND", &msg);
+        self.debug_msg("PRXY", &msg);
         self.recipient.try_send(msg)
     }
 

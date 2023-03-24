@@ -24,7 +24,12 @@ impl<A: Actor> Node<A> {
         nexus::add_proxy(self.aid, &self.addr).await
     }
 
-    async fn send_payload<P>(&self, sid: SenderId, kid: SessionId, pld: P) -> Result<(), MailboxError>
+    async fn send_payload<P>(
+        &self,
+        sid: SenderId,
+        kid: SessionId,
+        pld: P,
+    ) -> Result<(), MailboxError>
     where
         A: Handler<ProtocolMsg<P>>,
         <A as actix::Actor>::Context: ToEnvelope<A, ProtocolMsg<P>>,

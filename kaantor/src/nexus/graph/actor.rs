@@ -1,7 +1,7 @@
 use crate::{ActorId, IntoActorId};
 use actix::prelude::*;
 use kaantor_graph::Graph;
-use log::info;
+use log::debug;
 
 use super::message::{AddBiEdge, GetNeighbours};
 
@@ -38,7 +38,7 @@ impl Handler<GetNeighbours> for GraphActor {
 
     fn handle(&mut self, msg: GetNeighbours, _ctx: &mut Self::Context) -> Self::Result {
         let aid = msg.aid();
-        info!(
+        debug!(
             "RCVD | {:?} >> {:?} | BOURS | {:?}",
             ActorId::default(),
             self.aid(),
@@ -53,7 +53,7 @@ impl Handler<AddBiEdge> for GraphActor {
     type Result = <AddBiEdge as Message>::Result;
 
     fn handle(&mut self, msg: AddBiEdge, _ctx: &mut Self::Context) -> Self::Result {
-        info!(
+        debug!(
             "RCVD | {:?} >> {:?} | EDGE+ | {:?} <> {:?}",
             ActorId::default(),
             self.aid(),

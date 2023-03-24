@@ -1,4 +1,4 @@
-use crate::{ActorId, ProtocolMsg, ProtocolPxy};
+use crate::{ActorId, ProtocolMsg, ProtocolPxy, SessionId};
 use actix::prelude::*;
 use std::fmt::Debug;
 
@@ -30,9 +30,9 @@ pub(crate) enum SendTo {
 impl Debug for SendTo {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            Self::Actor(aid) => write!(f, "{aid:?}"),
-            Self::All => write!(f, "ALL"),
-            Self::AllExcept(_) => write!(f, "A--"),
+            Self::Actor(aid) => write!(f, "SEND {aid:?}"),
+            Self::All => write!(f, "SEND ALL"),
+            Self::AllExcept(_) => write!(f, "SEND A--"),
         }
     }
 }
@@ -40,18 +40,31 @@ impl Debug for SendTo {
 /// A message to trigger a send the payload.
 #[derive(Message)]
 #[rtype(result = "()")]
-pub(crate) struct SendPayload<P>(ActorId, SendTo, P);
+pub(crate) struct SendPayload<P> {
+    from: ActorId,
+    to: SendTo,
+    kid: SessionId,
+    pld: P,
+}
 
 impl<P> SendPayload<P> {
-    pub fn new(from: ActorId, to: SendTo, pld: P) -> Self {
-        Self(from, to, pld)
+    pub fn new(from: ActorId, to: SendTo, kid: SessionId, pld: P) -> Self {
+        Self { from, to, kid, pld }
+    }
+
+    pub fn from(&self) -> ActorId {
+        self.from
+    }
+
+    pub fn kid(&self) -> SessionId {
+        self.kid
     }
 
     pub fn to(&self) -> &SendTo {
-        &self.1
+        &self.to
     }
 
     pub fn payload(&self) -> &P {
-        &self.2
+        &self.pld
     }
 }
