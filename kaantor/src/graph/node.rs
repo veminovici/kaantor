@@ -7,10 +7,7 @@ pub struct Node {
 
 impl Node {
     pub fn new(aid: ActorId) -> Self {
-        Self {
-            aid,
-            ns: vec![],
-        }
+        Self { aid, ns: vec![] }
     }
 
     pub fn with_child(aid: ActorId, cid: ActorId) -> Self {
