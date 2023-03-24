@@ -1,5 +1,5 @@
 use actix::prelude::*;
-use kaantor::{nexus, ActorId, IntoActorId, Node, ProtocolMsg};
+use kaantor::{nexus, ActorId, IntoActorId, ProtocolMsg};
 use kaantor_derive::BuildActor;
 use log::{debug, info};
 use std::fmt::Debug;
