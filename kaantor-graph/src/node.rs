@@ -23,6 +23,10 @@ impl<K> Node<K> {
     pub fn neighbours(&self) -> impl Iterator<Item = &K> {
         self.ns.iter()
     }
+
+    pub fn is_leaf(&self) -> bool {
+        self.ns.is_empty()
+    }
 }
 
 impl<K> From<K> for Node<K> {

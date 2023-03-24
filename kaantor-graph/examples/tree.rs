@@ -1,4 +1,4 @@
-use kaantor_graph::{Tree, Node};
+use kaantor_graph::{Node, Tree};
 
 fn main() {
     let mut tree = Tree::new(1);
@@ -19,5 +19,4 @@ fn main() {
     tree.add_node(n4);
 
     tree.pretty_print("SPANNING_TREE");
-
 }

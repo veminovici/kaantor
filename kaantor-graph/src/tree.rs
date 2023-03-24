@@ -55,7 +55,7 @@ impl<K: Debug + PartialEq> Tree<K> {
             .iter()
             .find(|node| node.key() == key)
             .map(|node| {
-                if node.neighbours().count() == 0 {
+                if node.is_leaf() {
                     tb.add_empty_child(format!("{:?}", key))
                 } else {
                     let tb = tb.begin_child(format!("{:?}", key));
