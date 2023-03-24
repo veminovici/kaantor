@@ -1,5 +1,5 @@
 [workspace]
-members = ["kaantor", "kaantor_graph"]
+members = ["kaantor", "kaantor-graph"]
 
 [workspace.dependencies]
 actix = "0.13"
