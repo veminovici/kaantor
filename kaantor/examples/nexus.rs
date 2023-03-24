@@ -1,5 +1,4 @@
 use actix::prelude::*;
-use anyhow::Result;
 use kaantor::{nexus, ActorId, IntoActorId, Node, ProtocolMsg, SenderId, SessionId};
 use log::debug;
 use std::fmt::Debug;

@@ -1,7 +1,7 @@
 use crate::{nexus, ActorId, IntoActorId, ProtocolMsg, SenderId, SessionId};
 
 use actix::{dev::ToEnvelope, prelude::*};
-use anyhow::{anyhow, Result};
+use anyhow::Result;
 
 pub struct Node<A: Actor> {
     aid: ActorId,
