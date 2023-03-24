@@ -62,12 +62,9 @@ impl Handler<ProtocolMsg<MyPayload>> for MyActor {
 
             match msg.payload() {
                 MyPayload::Start(tkn) => {
-                    //let ns = nexus::get_neighbours(me).await.unwrap();
                     let _ = nexus::send_to_all_neighbours(me, *kid, MyPayload::Ping(*tkn)).await;
                 }
                 MyPayload::Ping(tkn) => {
-                    // debug!("DUMP | {:?} | PING | {:04?}", me, tkn);
-
                     let to = msg.sid().aid();
                     let _ = nexus::send_to_actor(me, to, *kid, MyPayload::Pong(*tkn + 1)).await;
                 }
@@ -75,11 +72,6 @@ impl Handler<ProtocolMsg<MyPayload>> for MyActor {
                     debug!("{:?} || DONE | {:04?}", me, tkn);
                 }
             }
-
-            // let ns = nexus::get_neighbours(me).await.unwrap();
-            // println!("RCVD | {:?} | PING | ns={:?}", me, ns);
-
-            () // this is the <Ping as Message>::Result.
         }
         .into_actor(self)
         .boxed_local()
