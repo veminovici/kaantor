@@ -53,7 +53,7 @@ impl Handler<ProtocolMsg<MyPayload>> for MyActor {
                 msg.payload()
             );
 
-            let ns = nexus::get_neighbours::<MyPayload>(me).await.unwrap();
+            let ns = nexus::get_neighbours(me).await.unwrap();
             println!("RCVD | {:?} | PING | ns={:?}", me, ns);
 
             () // this is the <Ping as Message>::Result.
@@ -77,15 +77,15 @@ fn main() {
         // Create the nodes
         let aid1 = ActorId::from(1);
         let node1 = create(aid1);
-        let _ = nexus::add_node(aid1, &node1).await;
+        let _ = nexus::add_proxy(aid1, &node1).await;
 
         let aid2 = ActorId::from(2);
         let node2 = create(aid2);
-        let _ = nexus::add_node(aid2, &node2).await;
+        let _ = nexus::add_proxy(aid2, &node2).await;
 
         let aid3 = ActorId::from(3);
         let node3 = create(aid3);
-        let _ = nexus::add_node(aid3, &node3).await;
+        let _ = nexus::add_proxy(aid3, &node3).await;
 
         // Create the edges between the nodes
         let _ = nexus::add_edge::<MyPayload>(aid1, aid2).await;

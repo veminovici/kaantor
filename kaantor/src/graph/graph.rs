@@ -25,6 +25,12 @@ impl Graph {
             .iter_mut()
             .find(|n| n.aid() == &nid)
             .map(|n| n.add_child(cid))
+            .or({
+                let n = Node::with_child(nid, cid);
+                self.nodes.push(n);
+
+                Some(())
+            })
             .unwrap()
     }
 

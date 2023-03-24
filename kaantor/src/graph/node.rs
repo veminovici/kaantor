@@ -13,6 +13,10 @@ impl Node {
         }
     }
 
+    pub fn with_child(aid: ActorId, cid: ActorId) -> Self {
+        Self { aid, children: vec![cid] }
+    }
+
     pub fn aid(&self) -> &ActorId {
         &self.aid
     }
