@@ -47,27 +47,26 @@ impl Handler<ProtocolMsg<MyPayload>> for MyActor {
 
     fn handle(&mut self, msg: ProtocolMsg<MyPayload>, _ctx: &mut Self::Context) -> Self::Result {
         let me = self.aid();
+        let kid = *msg.kid();
+        let sid = *msg.sid();
+
+        info!(
+            "{:?} || RCVD | {:?} >> {:?} | {:?} | {:?}",
+            me,
+            sid,
+            me,
+            kid,
+            msg.payload()
+        );
 
         async move {
-            let kid = msg.kid();
-            let sid = msg.sid();
-
-            info!(
-                "{:?} || RCVD | {:?} >> {:?} | {:?} | {:?}",
-                me,
-                sid,
-                me,
-                kid,
-                msg.payload()
-            );
-
             match msg.payload() {
                 MyPayload::Start(tkn) => {
-                    let _ = nexus::send_to_all_neighbours(me, *kid, MyPayload::Ping(*tkn)).await;
+                    let _ = nexus::send_to_all_neighbours(me, kid, MyPayload::Ping(*tkn)).await;
                 }
                 MyPayload::Ping(tkn) => {
                     let to = sid.aid();
-                    let _ = nexus::send_to_actor(me, to, *kid, MyPayload::Pong(*tkn + 1)).await;
+                    let _ = nexus::send_to_actor(me, to, kid, MyPayload::Pong(*tkn + 1)).await;
                 }
                 MyPayload::Pong(tkn) => {
                     debug!("{:?} || DONE | {:04?}", me, tkn);
