@@ -1,10 +1,10 @@
 use actix::prelude::*;
 use kaantor::{nexus, ActorId, IntoActorId, ProtocolMsg};
-use kaantor_derive::BuildActor;
+use kaantor_derive::BuildNode;
 use log::{debug, info};
 use std::fmt::Debug;
 
-#[derive(BuildActor)]
+#[derive(BuildNode)]
 #[payload(MyPayload, MyPayload2)]
 struct MyActor(ActorId);
 

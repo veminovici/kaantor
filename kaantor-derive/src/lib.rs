@@ -5,11 +5,11 @@ extern crate proc_macro;
 use proc_macro::TokenStream;
 use syn::DeriveInput;
 
-mod build_actor;
+mod build_node;
 
-#[proc_macro_derive(BuildActor, attributes(payload))]
-pub fn message_derive_rtype(input: TokenStream) -> TokenStream {
+#[proc_macro_derive(BuildNode, attributes(payload))]
+pub fn buildnode_derive(input: TokenStream) -> TokenStream {
     let ast: DeriveInput = syn::parse(input).unwrap();
 
-    build_actor::expand(&ast).into()
+    build_node::expand(&ast).into()
 }

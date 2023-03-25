@@ -8,7 +8,7 @@ struct MyPayloadA;
 #[rtype(result = "()")]
 struct MyPayloadB;
 
-#[derive(BuildActor)]
+#[derive(BuildNode)]
 #[payload(MyPayloadA, MyPayloadB)]
 struct MyActor(kaantor::ActorId);
 
