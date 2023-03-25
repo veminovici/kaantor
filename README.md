@@ -31,7 +31,7 @@ INFO  A001 || RCVD | A003 >> A001 | K010 | PONG 0013
 ## KAANTOR-TRAVERSALS
 A crate which provides implementations for several traversal algorithms.
 
-### Flooding Algorith
+### Flooding Algorithm
 The implementation can be found at [flooding.rs](./kaantor-traversals/src/flooding.rs). The current implementation is a simplified one which does not take in account concurrent flooding sessions. You can see a full running example of the algorithm in [flooding.rs](./kaantor-traversals/examples/flooding.rs) under the [examples](./kaantor-traversals/examples/) folder.
 
 ```bsh
@@ -40,7 +40,7 @@ RUST_LOG=debug cargo run --example flooding
 INFO Starting the FLOODING example
 INFO A001 || RCVD | USER >> A001 | K010 | START 0012
 INFO A002 || RCVD | A001 >> A002 | K010 | FORWARD 0012
-NFO  A003 || RCVD | A001 >> A003 | K010 | FORWARD 0012
+INFO A003 || RCVD | A001 >> A003 | K010 | FORWARD 0012
 INFO A001 || RCVD | A002 >> A001 | K010 | FORWARD 0012
 INFO A001 || RCVD | A003 >> A001 | K010 | FORWARD 0012
 ```
@@ -65,7 +65,7 @@ RUST_LOG=debug cargo run --example derive
 ---
 
 ## KAANTOR-GRAPH
-A crate which implements a graph and tree data structures using adjacent lists. If you choose to use the *pretty* feature, you can pretty-print tree structures. 
+A crate which implements graph and tree data structures using adjacent lists. If you choose to use the *pretty* feature, you can pretty-print tree structures. 
 
 ### Build and Run the Examples
 For an example, see [main.rs](./examples/tree/src/main.rs) in the *tree* examples folder. In the example we build a tree with 1 as root, which has to child nodes, 2 and 3. The node 2 has one child as well, node 3.
