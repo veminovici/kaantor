@@ -54,8 +54,8 @@ impl Handler<ProtocolMsg<FloodingPld>> for FloodingNode {
         let pld = *msg.payload();
 
         info!(
-            "{:?} || RCVD | {:?} >> {:?} | {:?} | {:?}",
-            &me, &sid, &me, &kid, &pld
+            "{:?} || RCVD | {:?} >> {:?} | {:?} | {:?} | {:?}",
+            &me, &sid, &me, &kid, &pld, self.tkn
         );
 
         async fn fwd(arg: Option<(ActorId, SessionId, Token)>) {
@@ -93,15 +93,6 @@ mod utests {
     fn protocol() {
         env_logger::init();
         info!("Starting the example NEXUS_GET");
-
-        // async fn create(aid: ActorId) -> Node<MyActor> {
-        //     let node = MyActor::from(aid);
-        //     let addr = node.start();
-        //     let node = Node::new(aid, addr);
-        //     let _ = node.register_proxy::<MyPayload>().await;
-        //     let _ = node.register_proxy::<MyPayload2>().await;
-        //     node
-        // }
 
         // initialize system
         let _code = System::new().block_on(async {

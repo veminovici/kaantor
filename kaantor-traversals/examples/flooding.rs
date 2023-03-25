@@ -5,7 +5,7 @@ use log::info;
 
 fn main() {
     env_logger::init();
-    info!("Starting the example NEXUS_GET");
+    info!("Starting the FLOODING example");
 
     // async fn create(aid: ActorId) -> Node<MyActor> {
     //     let node = MyActor::from(aid);

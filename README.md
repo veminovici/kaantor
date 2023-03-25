@@ -28,6 +28,25 @@ INFO  A001 || RCVD | A003 >> A001 | K010 | PONG 0013
 
 ---
 
+## KAANTOR-TRAVERSALS
+A crate which provides implementations for several traversal algorithms.
+
+### Flooding Algorith
+The implementation can be found at [flooding.rs](./kaantor-traversals/src/flooding.rs). The current implementation is a simplified one which does not take in account concurrent flooding sessions. You can see a full running example of the algorithm in [flooding.rs](./kaantor-traversals/examples/flooding.rs) under the [examples](./kaantor-traversals/examples/) folder.
+
+```bsh
+RUST_LOG=debug cargo run --example flooding
+
+INFO Starting the FLOODING example
+INFO A001 || RCVD | USER >> A001 | K010 | START 0012
+INFO A002 || RCVD | A001 >> A002 | K010 | FORWARD 0012
+NFO  A003 || RCVD | A001 >> A003 | K010 | FORWARD 0012
+INFO A001 || RCVD | A002 >> A001 | K010 | FORWARD 0012
+INFO A001 || RCVD | A003 >> A001 | K010 | FORWARD 0012
+```
+
+---
+
 ## KAANTOR-DERIVE
 A create which implements the **BuildNode** derive macro. For an example, see the [derive.rs](./kaantor-derive/examples/derive.rs).
 
