@@ -5,7 +5,7 @@ use log::{debug, info};
 use std::fmt::Debug;
 
 #[derive(BuildNode)]
-#[payload(MyPayload, MyPayload2)]
+#[payload(MyPayload)]
 struct MyActor(ActorId);
 
 impl Actor for MyActor {
@@ -41,12 +41,12 @@ impl Debug for MyPayload {
     }
 }
 
-impl Message for MyPayload {
-    type Result = ();
-}
+// impl Message for MyPayload {
+//     type Result = ();
+// }
 
 impl Handler<ProtocolMsg<MyPayload>> for MyActor {
-    type Result = ResponseActFuture<Self, <MyPayload as Message>::Result>;
+    type Result = ResponseActFuture<Self, <ProtocolMsg<MyPayload> as Message>::Result>;
 
     fn handle(&mut self, msg: ProtocolMsg<MyPayload>, _ctx: &mut Self::Context) -> Self::Result {
         let me = self.aid();
@@ -75,26 +75,6 @@ impl Handler<ProtocolMsg<MyPayload>> for MyActor {
         }
         .into_actor(self)
         .boxed_local()
-    }
-}
-
-struct MyPayload2;
-
-impl Debug for MyPayload2 {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("MyPayload2").finish()
-    }
-}
-
-impl Message for MyPayload2 {
-    type Result = ();
-}
-
-impl Handler<ProtocolMsg<MyPayload2>> for MyActor {
-    type Result = ResponseActFuture<Self, <MyPayload2 as Message>::Result>;
-
-    fn handle(&mut self, _msg: ProtocolMsg<MyPayload2>, _ctx: &mut Self::Context) -> Self::Result {
-        todo!()
     }
 }
 
