@@ -50,11 +50,11 @@ INFO A001 || RCVD | A003 >> A001 | K010 | FORWARD 0012
 ## KAANTOR-DERIVE
 A create which implements a set of derive macros.
 
-### BuildNode Derive-Macro
+### BuildNode derive macro
 The **BuildNode** derive macro can be used to automatically generate a **build*8 function. The macro should be
 added to any structure which represents a node. The macro must be followed by the **payload** attribute whihc should contain the list of supported payloads by the node. 
 
-### IntoActorId Derive-Macro
+### IntoActorId derive macro
 The **IntoActorId** derive macro can be used to automatically genera the implementation for the **IntoActorId*8 trait for a given node structure. The node structure must have a *aid* field or type *ActorId*.
 
 ### Build and Run the Example
