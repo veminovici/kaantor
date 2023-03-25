@@ -39,13 +39,7 @@ impl Handler<ProtocolMsg<FloodingPld>> for FloodingNode {
         let (me, _sid, kid, pld) = msg.decompose_rcvd(self, tkn_debug.as_str());
 
         let fut = match (pld, self.tkn) {
-            (FloodingPld::Start(tkn), _) => {
-                self.tkn = Some(tkn);
-
-                let args = Some((me, kid, FloodingPld::Forward(tkn)));
-                nexus::send_to_neighbours(args)
-            }
-            (FloodingPld::Forward(tkn), None) => {
+            (FloodingPld::Start(tkn), None) | (FloodingPld::Forward(tkn), None) => {
                 self.tkn = Some(tkn);
 
                 let args = Some((me, kid, FloodingPld::Forward(tkn)));
