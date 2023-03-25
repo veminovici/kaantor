@@ -32,12 +32,7 @@ impl<P> ProtocolMsg<P> {
         &self.kid
     }
 
-    pub fn decompose_log<A>(
-        &self,
-        actor: &A,
-        pfx: &str,
-        sfx: &str,
-    ) -> (ActorId, SenderId, SessionId, P)
+    pub fn decompose_rcvd<A>(&self, actor: &A, sfx: &str) -> (ActorId, SenderId, SessionId, P)
     where
         A: IntoActorId,
         P: Copy + Debug,
@@ -48,8 +43,8 @@ impl<P> ProtocolMsg<P> {
         let pld = *self.payload();
 
         info!(
-            "{:?} || {} | {:?} >> {:?} | {:?} | {:?} | {:?}",
-            &me, pfx, &sid, &me, &kid, &pld, sfx
+            "{:?} || RCVD | {:?} >> {:?} | {:?} | {:?} | {:?}",
+            &me, &sid, &me, &kid, &pld, sfx
         );
 
         (me, sid, kid, pld)
