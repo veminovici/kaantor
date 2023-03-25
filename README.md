@@ -12,11 +12,11 @@ distributed algorithms. You can build a graph by connecting the actor nodes. Onc
 any of the implemented ditributed algorithms.  
 
 ### Build and Run the Examples
-For a simple example (ping-pong) see [nexus.rs](./kaantor/examples/nexus.rs) in the *examples* folder under *kaantor* project. In the example, we create a tree where the node 1 is connected to nodes 2 and 3. We start a ping/pong protocol, by sending a PING message from node 1 to its neighbour nodes, 2 and 3. The two nodes, reponde back with a PONG.
+For a simple example (ping-pong) see [ping_pong.rs](./kaantor/examples/ping_pong.rs) in the *examples* folder under *kaantor* project. In the example, we create a tree where the node 1 is connected to nodes 2 and 3. We start a ping/pong protocol, by sending a PING message from node 1 to its neighbour nodes, 2 and 3. The two nodes, reponde back with a PONG.
 
 ```bsh
 cargo build
-RUST_LOG=debug cargo run --example nexus
+RUST_LOG=debug cargo run --example ping_pong
 
 INFO  Starting the example NEXUS_GET
 INFO  A001 || RCVD | USER >> A001 | K010 | START 0012
