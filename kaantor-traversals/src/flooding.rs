@@ -35,8 +35,8 @@ impl Handler<ProtocolMsg<FloodingPld>> for FloodingNode {
     type Result = ResponseActFuture<Self, <ProtocolMsg<FloodingPld> as Message>::Result>;
 
     fn handle(&mut self, msg: ProtocolMsg<FloodingPld>, _ctx: &mut Self::Context) -> Self::Result {
-        let sfx = format!("{:?}", &self.tkn);
-        let (me, _sid, kid, pld) = msg.decompose_rcvd(self, sfx.as_str());
+        let tkn_debug = format!("{:?}", &self.tkn);
+        let (me, _sid, kid, pld) = msg.decompose_rcvd(self, tkn_debug.as_str());
 
         async fn continuation(arg: Option<(ActorId, SessionId, Token)>) {
             if let Some((from, kid, tkn)) = arg {
