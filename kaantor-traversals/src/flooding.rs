@@ -36,7 +36,7 @@ impl Handler<ProtocolMsg<FloodingPld>> for FloodingNode {
 
     fn handle(&mut self, msg: ProtocolMsg<FloodingPld>, _ctx: &mut Self::Context) -> Self::Result {
         let tkn_debug = format!("{:?}", &self.tkn);
-        let (me, _sid, kid, pld) = msg.decompose_rcvd(self, tkn_debug.as_str());
+        let (me, _sid, kid, pld) = msg.deconstruct_rcvd(self, tkn_debug.as_str());
 
         let fut = match (pld, self.tkn) {
             (FloodingPld::Start(tkn), None) | (FloodingPld::Forward(tkn), None) => {

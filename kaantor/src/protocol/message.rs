@@ -32,7 +32,7 @@ impl<P> ProtocolMsg<P> {
         &self.kid
     }
 
-    pub fn decompose_rcvd<A>(&self, actor: &A, sfx: &str) -> (ActorId, SenderId, SessionId, P)
+    pub fn deconstruct_rcvd<A>(&self, actor: &A, sfx: &str) -> (ActorId, SenderId, SessionId, P)
     where
         A: IntoActorId,
         P: Copy + Debug,
