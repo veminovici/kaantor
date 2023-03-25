@@ -1,4 +1,4 @@
-use kaantor_derive::*;
+use kaantor_derive::{BuildNode, FromActorId, IntoActorId};
 
 #[derive(::actix::Message)]
 #[rtype(result = "()")]
@@ -8,18 +8,14 @@ struct MyPayloadA;
 #[rtype(result = "()")]
 struct MyPayloadB;
 
-#[derive(BuildNode)]
+#[derive(BuildNode, Default, FromActorId, IntoActorId)]
 #[payload(MyPayloadA, MyPayloadB)]
-struct MyActor(kaantor::ActorId);
+struct MyActor {
+    aid: kaantor::ActorId
+}
 
 impl ::actix::Actor for MyActor {
     type Context = actix::Context<Self>;
-}
-
-impl From<kaantor::ActorId> for MyActor {
-    fn from(value: kaantor::ActorId) -> Self {
-        Self(value)
-    }
 }
 
 impl actix::Handler<::kaantor::ProtocolMsg<MyPayloadA>> for MyActor {

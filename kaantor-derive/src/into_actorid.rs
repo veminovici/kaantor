@@ -8,7 +8,7 @@ pub fn expand(ast: &syn::DeriveInput) -> TokenStream {
     quote! {
 
         impl #impl_generics ::kaantor::IntoActorId for #name #ty_generics #where_clause {
-            fn aid(&self) -> ActorId {
+            fn aid(&self) -> ::kaantor::ActorId {
                 self.aid
             }
         }
