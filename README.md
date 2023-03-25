@@ -48,12 +48,24 @@ INFO A001 || RCVD | A003 >> A001 | K010 | FORWARD 0012
 ---
 
 ## KAANTOR-DERIVE
-A create which implements the **BuildNode** derive macro. For an example, see the [derive.rs](./kaantor-derive/examples/derive.rs).
+A create which implements a set of derive macros.
+
+### BuildNode Derive-Macro
+The **BuildNode** derive macro can be used to automatically generate a **build*8 function. The macro should be
+added to any structure which represents a node. The macro must be followed by the **payload** attribute whihc should contain the list of supported payloads by the node. 
+
+### IntoActorId Derive-Macro
+The **IntoActorId** derive macro can be used to automatically genera the implementation for the **IntoActorId*8 trait for a given node structure. The node structure must have a *aid* field or type *ActorId*.
+
+### Build and Run the Example
+For an example, see the [derive.rs](./kaantor-derive/examples/derive.rs).
 
 ```rust
-#[derive(BuildNode)]
+#[derive(BuildNode, IntoActorId)]
 #[payload(MyPayloadA, MyPayloadB)]
-struct MyActor;
+struct MyActor {
+   aid: ActorId,
+};
 ```
 
 ### Build and Run the Example
