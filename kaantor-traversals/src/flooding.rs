@@ -51,10 +51,7 @@ impl Handler<ProtocolMsg<FloodingPld>> for FloodingNode {
                 continuation(Some((me, kid, tkn)))
             }
             FloodingPld::Forward(tkn) => match self.tkn {
-                Some(_) => {
-                    self.tkn = Some(tkn);
-                    continuation(None)
-                }
+                Some(_) => continuation(None),
                 None => {
                     self.tkn = Some(tkn);
                     continuation(Some((me, kid, tkn)))
