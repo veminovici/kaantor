@@ -1,5 +1,5 @@
 use actix::prelude::*;
-use kaantor::{nexus, ActorId, ProtocolMsg, SessionId};
+use kaantor::{nexus, ActorId, ProtocolMsg};
 use kaantor_derive::{BuildNode, FromActorId, IntoActorId};
 use std::fmt::Debug;
 
@@ -38,23 +38,18 @@ impl Handler<ProtocolMsg<FloodingPld>> for FloodingNode {
         let tkn_debug = format!("{:?}", &self.tkn);
         let (me, _sid, kid, pld) = msg.decompose_rcvd(self, tkn_debug.as_str());
 
-        async fn continuation(arg: Option<(ActorId, SessionId, Token)>) {
-            if let Some((from, kid, tkn)) = arg {
-                let ns = nexus::get_neighbours(from).await.unwrap();
-                let _ = nexus::send(from, ns.iter().copied(), kid, FloodingPld::Forward(tkn)).await;
-            }
-        }
-
         let fut = match pld {
             FloodingPld::Start(tkn) => {
                 self.tkn = Some(tkn);
-                continuation(Some((me, kid, tkn)))
+                let args = Some((me, kid, FloodingPld::Forward(tkn)));
+                nexus::send_to_neighbours(args)
             }
             FloodingPld::Forward(tkn) => match self.tkn {
-                Some(_) => continuation(None),
+                Some(_) => nexus::send_to_neighbours(None),
                 None => {
                     self.tkn = Some(tkn);
-                    continuation(Some((me, kid, tkn)))
+                    let args = Some((me, kid, FloodingPld::Forward(tkn)));
+                    nexus::send_to_neighbours(args)
                 }
             },
         };
