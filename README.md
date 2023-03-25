@@ -1,6 +1,6 @@
 # Simplee / Kaantor
 
-BADGES_HERE
+[![Rust](https://github.com/veminovici/kaantor/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/veminovici/kaantor/actions/workflows/ci.yml)
 
 A project for distributed algorithms using the actor model.
 
