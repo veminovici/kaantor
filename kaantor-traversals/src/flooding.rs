@@ -54,7 +54,8 @@ impl Handler<ProtocolMsg<FloodingPld>> for FloodingNode {
 
         async fn fwd(arg: Option<(ActorId, SessionId, Token)>) {
             if let Some((from, kid, tkn)) = arg {
-                let _ = nexus::send_to_all_neighbours(from, kid, FloodingPld::Forward(tkn)).await;
+                let ns = nexus::get_neighbours(from).await.unwrap();
+                let _ = nexus::send(from, ns.iter().copied(), kid, FloodingPld::Forward(tkn)).await;
             }
         }
 

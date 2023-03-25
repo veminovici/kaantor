@@ -58,11 +58,14 @@ impl Handler<ProtocolMsg<MyPayload>> for MyActor {
         async move {
             match pld {
                 MyPayload::Start(tkn) => {
-                    let _ = nexus::send_to_all_neighbours(me, kid, MyPayload::Ping(tkn)).await;
+                    let ns = nexus::get_neighbours(me).await.unwrap();
+                    let _ = nexus::send(me, ns.iter().copied(), kid, MyPayload::Ping(tkn)).await;
                 }
                 MyPayload::Ping(tkn) => {
                     let to = sid.aid();
-                    let _ = nexus::send_to_actor(me, to, kid, MyPayload::Pong(tkn + 1)).await;
+                    let _ =
+                        nexus::send(me, vec![to].iter().copied(), kid, MyPayload::Pong(tkn + 1))
+                            .await;
                 }
                 MyPayload::Pong(tkn) => {
                     debug!("{:?} || DONE | {:04?}", me, tkn);

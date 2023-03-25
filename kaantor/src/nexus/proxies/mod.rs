@@ -20,29 +20,9 @@ where
     kernel.send(msg).await.map_err(|e| anyhow!(e))
 }
 
-pub async fn send_to_actor<P>(from: ActorId, to: ActorId, kid: SessionId, pld: P) -> Result<()>
-where
-    P: Copy + Debug + Send + Unpin + 'static,
-{
-    let actor = ProxiesActor::<P>::from_registry();
-    let msg = message::SendPayload::new(from, message::SendTo::Actor(to), kid, pld);
-
-    actor.send(msg).await.map_err(|e| anyhow!(e))
-}
-
-pub async fn send_to_all_neighbours<P>(from: ActorId, kid: SessionId, pld: P) -> Result<()>
-where
-    P: Copy + Debug + Send + Unpin + 'static,
-{
-    let actor = ProxiesActor::<P>::from_registry();
-    let msg = message::SendPayload::new(from, message::SendTo::All, kid, pld);
-
-    actor.send(msg).await.map_err(|e| anyhow!(e))
-}
-
-pub async fn send_to_all_neighbours_except<P>(
+pub async fn send<P>(
     from: ActorId,
-    except: impl Iterator<Item = ActorId>,
+    actors: impl Iterator<Item = ActorId>,
     kid: SessionId,
     pld: P,
 ) -> Result<()>
@@ -50,8 +30,7 @@ where
     P: Copy + Debug + Send + Unpin + 'static,
 {
     let actor = ProxiesActor::<P>::from_registry();
-    let msg =
-        message::SendPayload::new(from, message::SendTo::AllExcept(except.collect()), kid, pld);
+    let msg = message::SendPayload::new(from, message::SendTo::Actors(actors.collect()), kid, pld);
 
     actor.send(msg).await.map_err(|e| anyhow!(e))
 }

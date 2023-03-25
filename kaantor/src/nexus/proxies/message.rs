@@ -22,17 +22,13 @@ impl<P: Send> AddProxy<P> {
 }
 
 pub(crate) enum SendTo {
-    Actor(ActorId),
-    All,
-    AllExcept(Vec<ActorId>),
+    Actors(Vec<ActorId>),
 }
 
 impl Debug for SendTo {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            Self::Actor(aid) => write!(f, "SEND {aid:?}"),
-            Self::All => write!(f, "SEND ALL"),
-            Self::AllExcept(_) => write!(f, "SEND A--"),
+            Self::Actors(xs) => write!(f, "SEND {xs:?}"),
         }
     }
 }
