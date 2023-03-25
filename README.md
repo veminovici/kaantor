@@ -4,6 +4,8 @@
 
 A project for distributed algorithms using the actor model.
 
+---
+
 ## KAANTOR
 A crate which implements the node actors for distributed algorithms. Each node can implement one or multiple
 distributed algorithms. You can build a graph by connecting the actor nodes. Once the graph is built, you can run 
@@ -23,6 +25,25 @@ INFO  A003 || RCVD | A001 >> A003 | K010 | PING 0012
 INFO  A001 || RCVD | A002 >> A001 | K010 | PONG 0013
 INFO  A001 || RCVD | A003 >> A001 | K010 | PONG 0013
 ```
+
+---
+
+## KAANTOR-DERIVE
+A create which implements the **BuildNode** derive macro. For an example, see the [derive.rs](./kaantor-derive/examples/derive.rs).
+
+```rust
+#[derive(BuildNode)]
+#[payload(MyPayloadA, MyPayloadB)]
+struct MyActor;
+```
+
+### Build and Run the Example
+```bsh
+cargo build
+RUST_LOG=debug cargo run --example derive
+```
+
+---
 
 ## KAANTOR-GRAPH
 A crate which implements a graph and tree data structures using adjacent lists. If you choose to use the *pretty* feature, you can pretty-print tree structures. 
