@@ -1,12 +1,12 @@
 use actix::prelude::*;
 use kaantor::{nexus, ActorId, IntoActorId, ProtocolMsg, SessionId};
-use kaantor_derive::BuildNode;
+use kaantor_derive::{BuildNode, IntoActorId};
 use log::info;
 use std::fmt::Debug;
 
 pub type Token = usize;
 
-#[derive(BuildNode)]
+#[derive(BuildNode, IntoActorId)]
 #[payload(FloodingPld)]
 pub struct FloodingNode {
     aid: ActorId,
@@ -20,12 +20,6 @@ impl Actor for FloodingNode {
 impl From<ActorId> for FloodingNode {
     fn from(aid: ActorId) -> Self {
         Self { aid, tkn: None }
-    }
-}
-
-impl IntoActorId for FloodingNode {
-    fn aid(&self) -> ActorId {
-        self.aid
     }
 }
 
