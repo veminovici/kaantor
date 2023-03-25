@@ -6,6 +6,7 @@ use proc_macro::TokenStream;
 use syn::DeriveInput;
 
 mod build_node;
+mod from_actorid;
 mod into_actorid;
 
 #[proc_macro_derive(BuildNode, attributes(payload))]
@@ -20,4 +21,11 @@ pub fn intoactorid_derive(input: TokenStream) -> TokenStream {
     let ast: DeriveInput = syn::parse(input).unwrap();
 
     into_actorid::expand(&ast).into()
+}
+
+#[proc_macro_derive(FromActorId)]
+pub fn fromactorid_derive(input: TokenStream) -> TokenStream {
+    let ast: DeriveInput = syn::parse(input).unwrap();
+
+    from_actorid::expand(&ast).into()
 }

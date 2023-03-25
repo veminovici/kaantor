@@ -55,13 +55,16 @@ The **BuildNode** derive macro can be used to automatically generate a **build*8
 added to any structure which represents a node. The macro must be followed by the **payload** attribute whihc should contain the list of supported payloads by the node. 
 
 ### IntoActorId derive macro
-The **IntoActorId** derive macro can be used to automatically genera the implementation for the **IntoActorId*8 trait for a given node structure. The node structure must have a *aid* field or type *ActorId*.
+The **IntoActorId** derive macro can be used to automatically generate the implementation for the **IntoActorId*8 trait for a given node structure. The node structure must have a *aid* field of type *ActorId*.
+
+## FromActorId derive macro
+The **FromActorId** derive macro can be used to automatically generate the implementation for the *From<ActorID>* trait for a given node structure. The node structure must have a *aid* field of type *ActorId* and implement the *Default* trait as well.
 
 ### Build and Run the Example
 For an example, see the [derive.rs](./kaantor-derive/examples/derive.rs).
 
 ```rust
-#[derive(BuildNode, IntoActorId)]
+#[derive(BuildNode, Default, IntoActorId, FromActorId)]
 #[payload(MyPayloadA, MyPayloadB)]
 struct MyActor {
    aid: ActorId,
