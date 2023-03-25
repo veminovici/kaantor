@@ -15,7 +15,7 @@ pub fn expand(ast: &syn::DeriveInput) -> TokenStream {
     quote! {
 
         impl #impl_generics #name #ty_generics #where_clause {
-            async fn build(aid: ::kaantor::ActorId) -> ::kaantor::Node<#name #ty_generics> {
+            pub async fn build(aid: ::kaantor::ActorId) -> ::kaantor::Node<#name #ty_generics> {
                 use actix::prelude::*;
                 let node = #name::from(aid);
                 let addr = node.start();

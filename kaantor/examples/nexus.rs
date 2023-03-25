@@ -41,10 +41,6 @@ impl Debug for MyPayload {
     }
 }
 
-// impl Message for MyPayload {
-//     type Result = ();
-// }
-
 impl Handler<ProtocolMsg<MyPayload>> for MyActor {
     type Result = ResponseActFuture<Self, <ProtocolMsg<MyPayload> as Message>::Result>;
 
