@@ -1,5 +1,5 @@
 use actix::prelude::*;
-use kaantor::{IntoActorId, nexus};
+use kaantor::{nexus, IntoActorId};
 use kaantor_traversals::{FloodingNode, FloodingPld};
 use log::info;
 
