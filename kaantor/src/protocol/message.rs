@@ -1,5 +1,6 @@
-use crate::{SenderId, SessionId};
+use crate::{ActorId, IntoActorId, SenderId, SessionId};
 use actix::prelude::*;
+use log::info;
 use std::fmt::Debug;
 
 pub struct ProtocolMsg<P> {
@@ -29,6 +30,29 @@ impl<P> ProtocolMsg<P> {
 
     pub fn kid(&self) -> &SessionId {
         &self.kid
+    }
+
+    pub fn decompose_log<A>(
+        &self,
+        actor: &A,
+        pfx: &str,
+        sfx: &str,
+    ) -> (ActorId, SenderId, SessionId, P)
+    where
+        A: IntoActorId,
+        P: Copy + Debug,
+    {
+        let me = actor.aid();
+        let kid = *self.kid();
+        let sid = *self.sid();
+        let pld = *self.payload();
+
+        info!(
+            "{:?} || {} | {:?} >> {:?} | {:?} | {:?} | {:?}",
+            &me, pfx, &sid, &me, &kid, &pld, sfx
+        );
+
+        (me, sid, kid, pld)
     }
 }
 

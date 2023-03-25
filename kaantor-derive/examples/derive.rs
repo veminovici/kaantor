@@ -11,7 +11,7 @@ struct MyPayloadB;
 #[derive(BuildNode, Default, FromActorId, IntoActorId)]
 #[payload(MyPayloadA, MyPayloadB)]
 struct MyActor {
-    aid: kaantor::ActorId
+    aid: kaantor::ActorId,
 }
 
 impl ::actix::Actor for MyActor {

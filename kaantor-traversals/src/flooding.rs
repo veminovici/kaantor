@@ -1,7 +1,6 @@
 use actix::prelude::*;
-use kaantor::{nexus, ActorId, IntoActorId, ProtocolMsg, SessionId};
+use kaantor::{nexus, ActorId, ProtocolMsg, SessionId};
 use kaantor_derive::{BuildNode, FromActorId, IntoActorId};
-use log::info;
 use std::fmt::Debug;
 
 pub type Token = usize;
@@ -36,15 +35,8 @@ impl Handler<ProtocolMsg<FloodingPld>> for FloodingNode {
     type Result = ResponseActFuture<Self, <ProtocolMsg<FloodingPld> as Message>::Result>;
 
     fn handle(&mut self, msg: ProtocolMsg<FloodingPld>, _ctx: &mut Self::Context) -> Self::Result {
-        let me = self.aid();
-        let kid = *msg.kid();
-        let sid = *msg.sid();
-        let pld = *msg.payload();
-
-        info!(
-            "{:?} || RCVD | {:?} >> {:?} | {:?} | {:?} | {:?}",
-            &me, &sid, &me, &kid, &pld, self.tkn
-        );
+        let t = format!("{:?}", &self.tkn);
+        let (me, _sid, kid, pld) = msg.decompose_log(self, "RCVD", t.as_str());
 
         async fn fwd(arg: Option<(ActorId, SessionId, Token)>) {
             if let Some((from, kid, tkn)) = arg {
@@ -77,11 +69,12 @@ impl Handler<ProtocolMsg<FloodingPld>> for FloodingNode {
 #[cfg(test)]
 mod utests {
     use super::*;
+    use kaantor::IntoActorId;
 
     #[test]
     fn protocol() {
         env_logger::init();
-        info!("Starting the example NEXUS_GET");
+        log::info!("Starting the example NEXUS_GET");
 
         // initialize system
         let _code = System::new().block_on(async {
