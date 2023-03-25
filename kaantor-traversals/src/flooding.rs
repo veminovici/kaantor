@@ -38,7 +38,7 @@ impl Handler<ProtocolMsg<FloodingPld>> for FloodingNode {
         let t = format!("{:?}", &self.tkn);
         let (me, _sid, kid, pld) = msg.decompose_log(self, "RCVD", t.as_str());
 
-        async fn fwd(arg: Option<(ActorId, SessionId, Token)>) {
+        async fn continuation(arg: Option<(ActorId, SessionId, Token)>) {
             if let Some((from, kid, tkn)) = arg {
                 let ns = nexus::get_neighbours(from).await.unwrap();
                 let _ = nexus::send(from, ns.iter().copied(), kid, FloodingPld::Forward(tkn)).await;
@@ -48,16 +48,16 @@ impl Handler<ProtocolMsg<FloodingPld>> for FloodingNode {
         let fut = match pld {
             FloodingPld::Start(tkn) => {
                 self.tkn = Some(tkn);
-                fwd(Some((me, kid, tkn)))
+                continuation(Some((me, kid, tkn)))
             }
             FloodingPld::Forward(tkn) => match self.tkn {
                 Some(_) => {
                     self.tkn = Some(tkn);
-                    fwd(None)
+                    continuation(None)
                 }
                 None => {
                     self.tkn = Some(tkn);
-                    fwd(Some((me, kid, tkn)))
+                    continuation(Some((me, kid, tkn)))
                 }
             },
         };
@@ -65,4 +65,3 @@ impl Handler<ProtocolMsg<FloodingPld>> for FloodingNode {
         fut.into_actor(self).boxed_local()
     }
 }
-
