@@ -7,16 +7,6 @@ fn main() {
     env_logger::init();
     info!("Starting the FLOODING example");
 
-    // async fn create(aid: ActorId) -> Node<MyActor> {
-    //     let node = MyActor::from(aid);
-    //     let addr = node.start();
-    //     let node = Node::new(aid, addr);
-    //     let _ = node.register_proxy::<MyPayload>().await;
-    //     let _ = node.register_proxy::<MyPayload2>().await;
-    //     node
-    // }
-
-    // initialize system
     let _code = System::new().block_on(async {
         // STEP 1: Create the nodes
         let node1 = FloodingNode::build(1.into()).await;
@@ -30,4 +20,6 @@ fn main() {
         // STEP 3: Start the protocol
         let _ = node1.send(10.into(), FloodingPld::Start(12)).await;
     });
+
+    info!("Done");
 }
