@@ -12,5 +12,12 @@ pub fn expand(ast: &syn::DeriveInput) -> TokenStream {
                 self.aid
             }
         }
+
+        impl #impl_generics AsRef<::kaantor::ActorId> for #name #ty_generics #where_clause {
+            fn as_ref(&self) -> &::kaantor::ActorId {
+                &self.aid
+            }
+        }
+        
     }
 }
