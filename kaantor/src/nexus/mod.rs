@@ -9,7 +9,7 @@ use std::fmt::Debug;
 
 pub async fn send_to_neighbours<P>(arg: Option<(ActorId, SessionId, P)>)
 where
-    P: Copy + Debug + Send + Unpin + 'static
+    P: Copy + Debug + Send + Unpin + 'static,
 {
     if let Some((from, kid, pld)) = arg {
         let ns = get_neighbours(from).await.unwrap();

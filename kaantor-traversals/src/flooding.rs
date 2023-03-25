@@ -41,6 +41,7 @@ impl Handler<ProtocolMsg<FloodingPld>> for FloodingNode {
         let fut = match pld {
             FloodingPld::Start(tkn) => {
                 self.tkn = Some(tkn);
+
                 let args = Some((me, kid, FloodingPld::Forward(tkn)));
                 nexus::send_to_neighbours(args)
             }
@@ -48,6 +49,7 @@ impl Handler<ProtocolMsg<FloodingPld>> for FloodingNode {
                 Some(_) => nexus::send_to_neighbours(None),
                 None => {
                     self.tkn = Some(tkn);
+
                     let args = Some((me, kid, FloodingPld::Forward(tkn)));
                     nexus::send_to_neighbours(args)
                 }
