@@ -1,5 +1,7 @@
 # Simplee / Kaantor
 
+BADGES_HERE
+
 A project for distributed algorithms using the actor model.
 
 ## KAANTOR
